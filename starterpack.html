@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Starter Pack 2026 — Nourish UX/Design</title>
+  <script>
+    (function () {
+      const params  = new URLSearchParams(window.location.search);
+      const name    = params.get('name')    ? decodeURIComponent(params.get('name'))    : null;
+      const manager = params.get('manager') ? decodeURIComponent(params.get('manager')) : null;
+      const tag     = params.get('tag')     ? decodeURIComponent(params.get('tag'))     : null;
+
+      document.addEventListener('DOMContentLoaded', function () {
+        if (name) {
+          const h1 = document.getElementById('welcome-heading');
+          if (h1) h1.textContent = '👋 Welcome to Nourish, ' + name;
+        }
+        if (manager) {
+          document.querySelectorAll('[data-manager]').forEach(function (el) {
+            el.textContent = manager;
+          });
+        }
+        if (tag) {
+          const tagEl = document.getElementById('hero-tag');
+          if (tagEl) tagEl.textContent = tag;
+        }
+      });
+    })();
+  </script>
+  <style>
+    /* ─────────────────────────────────────────────────────
+       PULSE DESIGN TOKENS
+       Primary (teal): #66cccc ★ brand, #2b5656 CTA/dark, #3e7e7e mid
+       Neutral: #36393f body, #51555e mid, #9fa5b1 muted, #e7e8eb border,
+                #f3f4f5 subtle bg, #f9f9fa page bg, #ffffff surface
+       Accent – Lapis (UX): #4c4ba0 / #ededf5
+       Accent – Topaz (demos/sales): #039be5 / #e6f5fc
+       Accent – Olive (environments): #8d9f38 / #f4f5eb
+       Accent – Jade (product): #7b9d94 / #f2f5f4
+       Typography: Inter (system) for body; Georgia (system serif) for headings
+                   as closest available substitute for FS Me
+    ───────────────────────────────────────────────────── */
+    :root {
+      /* Primary */
+      --p-100:  #2b5656;
+      --p-90:   #3e7e7e;
+      --p-80:   #52a5a5;
+      --p-70:   #66cccc;
+      --p-40:   #c2ebeb;
+      --p-20:   #e0f5f5;
+      --p-10:   #f0fafa;
+
+      /* Neutral */
+      --n-120:  #36393f;
+      --n-110:  #51555e;
+      --n-100:  #6c727e;
+      --n-70:   #b7bbc4;
+      --n-50:   #dbdde2;
+      --n-40:   #e7e8eb;
+      --n-30:   #f3f4f5;
+      --n-20:   #f9f9fa;
+      --n-10:   #ffffff;
+
+      /* Accent: Lapis — UX/Design */
+      --lapis-6: #4c4ba0;
+      --lapis-1: #dbdbec;
+      --lapis-05:#ededf5;
+
+      /* Accent: Topaz — Sales demos */
+      --topaz-6: #027cb7;
+      --topaz-1: #cdebfa;
+      --topaz-05:#e6f5fc;
+
+      /* Accent: Olive — Demo environments */
+      --olive-6: #717f2d;
+      --olive-1: #e8ecd7;
+      --olive-05:#f4f5eb;
+
+      /* Accent: Jade — Product */
+      --jade-6:  #627e76;
+      --jade-1:  #e5ebea;
+      --jade-05: #f2f5f4;
+
+      /* Spacing & shape */
+      --radius:    8px;
+      --radius-sm: 5px;
+    }
+
+    /* ── Reset ──────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+      background: var(--n-20);
+      color: var(--n-120);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Headings — Georgia as FS Me stand-in ───────────── */
+    h1, h2, h3, .logo-wordmark {
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+      font-weight: 700;
+      color: var(--n-120);
+    }
+
+    /* ── Layout ─────────────────────────────────────────── */
+    .wrapper { max-width: 780px; margin: 0 auto; padding: 0 24px; }
+
+    /* ── Header ─────────────────────────────────────────── */
+    header {
+      background: var(--p-100);
+      padding: 0;
+      border-bottom: 3px solid var(--p-70);
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 0;
+    }
+
+    .logo-teal {
+      width: 36px; height: 36px;
+      background: var(--p-70);
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .logo-teal svg { width: 22px; height: 22px; }
+
+    .logo-wordmark {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--n-10);
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .logo-wordmark span {
+      display: block;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--p-40);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-top: 1px;
+    }
+
+    /* ── Hero ───────────────────────────────────────────── */
+    .hero {
+      background: var(--p-100);
+      padding: 48px 0 52px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* subtle teal arc — brand flavour, no image needed */
+    .hero::after {
+      content: '';
+      position: absolute;
+      right: -80px; bottom: -80px;
+      width: 320px; height: 320px;
+      border-radius: 50%;
+      border: 48px solid rgba(102,204,204,0.12);
+      pointer-events: none;
+    }
+
+    .hero-tag {
+      display: inline-block;
+      background: var(--p-70);
+      color: var(--p-100);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      border-radius: 3px;
+      padding: 3px 8px;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 {
+      font-size: clamp(26px, 5vw, 38px);
+      font-weight: 700;
+      color: var(--n-10);
+      line-height: 1.15;
+      margin-bottom: 14px;
+    }
+
+    .hero p {
+      font-size: 16px;
+      color: var(--p-40);
+      max-width: 520px;
+      line-height: 1.6;
+    }
+
+    /* ── Main content ───────────────────────────────────── */
+    main { padding: 48px 0 0; }
+
+    section { margin-bottom: 52px; }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--n-100);
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--n-40);
+      margin-bottom: 22px;
+    }
+
+    h2 {
+      font-size: 22px;
+      margin-bottom: 10px;
+      margin-top: 30px;
+      letter-spacing: -0.02em;
+    }
+    h2:first-of-type { margin-top: 0; }
+
+    p {
+      font-size: 15px;
+      color: var(--n-110);
+      margin-bottom: 14px;
+      line-height: 1.65;
+    }
+
+    /* ── Noticeboard callout ────────────────────────────── */
+    .noticeboard-callout {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      background: var(--p-10);
+      border: 1.5px solid var(--p-70);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      margin: 16px 0 22px;
+      text-decoration: none;
+      transition: box-shadow 0.15s, border-color 0.15s;
+    }
+    .noticeboard-callout:hover {
+      border-color: var(--p-90);
+      box-shadow: 0 0 0 3px var(--p-40);
+    }
+    .noticeboard-icon {
+      width: 36px; height: 36px;
+      background: var(--p-70);
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      color: var(--p-100);
+    }
+    .noticeboard-icon svg { width: 18px; height: 18px; }
+    .noticeboard-body strong {
+      display: block;
+      font-size: 14px; font-weight: 600;
+      color: var(--p-100);
+      margin-bottom: 3px;
+    }
+    .noticeboard-body span { font-size: 13px; color: var(--n-110); }
+
+    /* ── Ceremony cards ─────────────────────────────────── */
+    .ceremony-grid { display: grid; gap: 8px; margin-top: 14px; }
+
+    .ceremony {
+      background: var(--n-10);
+      border: 1px solid var(--n-40);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      display: flex; gap: 14px; align-items: flex-start;
+    }
+
+    .ceremony-freq {
+      background: var(--p-10);
+      color: var(--p-90);
+      border: 1px solid var(--p-40);
+      font-size: 11px; font-weight: 600;
+      border-radius: 3px;
+      padding: 3px 8px;
+      white-space: nowrap; flex-shrink: 0; margin-top: 2px;
+    }
+
+    .ceremony-body strong {
+      display: block; font-size: 14px; font-weight: 600;
+      color: var(--n-120); margin-bottom: 3px;
+    }
+    .ceremony-body span { font-size: 13px; color: var(--n-100); }
+
+    /* ── Wiki list ──────────────────────────────────────── */
+    .wiki-list { list-style: none; display: flex; flex-direction: column; gap: 7px; margin-top: 12px; }
+    .wiki-list li a {
+      font-size: 14px; color: var(--p-90);
+      text-decoration: none;
+      display: inline-flex; align-items: center; gap: 7px;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.1s;
+    }
+    .wiki-list li a:hover { border-color: var(--p-70); }
+    .wiki-list li a::before {
+      content: '';
+      display: inline-block;
+      width: 5px; height: 5px;
+      background: var(--p-70);
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ── Info box ───────────────────────────────────────── */
+    .info-box {
+      background: var(--p-10);
+      border-left: 3px solid var(--p-70);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      padding: 14px 16px;
+      font-size: 14px; color: var(--n-110);
+      margin: 16px 0;
+    }
+
+    /* ── Divider ────────────────────────────────────────── */
+    .divider { border: none; border-top: 1px solid var(--n-40); margin: 44px 0; }
+
+    /* ── Tools groups ───────────────────────────────────── */
+    .tools-group { margin-bottom: 34px; }
+
+    .tools-group-title {
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+      font-size: 15px; font-weight: 700;
+      color: var(--n-120);
+      margin-bottom: 10px;
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%; flex-shrink: 0;
+    }
+
+    .group-tag {
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 11px; font-weight: 500;
+      border-radius: 3px;
+      padding: 2px 7px;
+      margin-left: 2px;
+    }
+
+    /* colour variants */
+    .c-teal   { --bg: var(--p-10);    --border: var(--p-70);   --icon-bg: var(--p-40);  --icon-fg: var(--p-100); --hover-ring: var(--p-40); --dot-c: var(--p-70); }
+    .c-jade   { --bg: var(--jade-05); --border: var(--jade-1); --icon-bg: var(--jade-1); --icon-fg: var(--jade-6); --hover-ring: var(--jade-1); --dot-c: var(--jade-6); }
+    .c-lapis  { --bg: var(--lapis-05);--border: var(--lapis-1);--icon-bg: var(--lapis-1);--icon-fg: var(--lapis-6);--hover-ring: var(--lapis-1);--dot-c: var(--lapis-6); }
+    .c-olive  { --bg: var(--olive-05);--border: var(--olive-1);--icon-bg: var(--olive-1);--icon-fg: var(--olive-6);--hover-ring: var(--olive-1);--dot-c: var(--olive-6); }
+    .c-topaz  { --bg: var(--topaz-05);--border: var(--topaz-1);--icon-bg: var(--topaz-1);--icon-fg: var(--topaz-6);--hover-ring: var(--topaz-1);--dot-c: var(--topaz-6); }
+
+    .dot.c-teal  { background: var(--p-70); }
+    .dot.c-jade  { background: var(--jade-6); }
+    .dot.c-lapis { background: var(--lapis-6); }
+    .dot.c-olive { background: var(--olive-6); }
+    .dot.c-topaz { background: var(--topaz-6); }
+
+    .group-tag.c-lapis { background: var(--lapis-05); color: var(--lapis-6); }
+    .group-tag.c-olive { background: var(--olive-05); color: var(--olive-6); }
+    .group-tag.c-topaz { background: var(--topaz-05); color: var(--topaz-6); }
+
+    /* ── Link cards ─────────────────────────────────────── */
+    .link-list { display: flex; flex-direction: column; gap: 7px; margin-top: 12px; }
+
+    .link-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      background: var(--n-10);
+      border: 1px solid var(--n-40);
+      border-radius: var(--radius);
+      padding: 13px 15px;
+      text-decoration: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    /* coloured hover via CSS custom props on parent group */
+    .c-teal  .link-item:hover { border-color: var(--p-70);   box-shadow: 0 0 0 3px var(--p-40); }
+    .c-jade  .link-item:hover { border-color: var(--jade-6); box-shadow: 0 0 0 3px var(--jade-1); }
+    .c-lapis .link-item:hover { border-color: var(--lapis-6);box-shadow: 0 0 0 3px var(--lapis-1); }
+    .c-olive .link-item:hover { border-color: var(--olive-6);box-shadow: 0 0 0 3px var(--olive-1); }
+    .c-topaz .link-item:hover { border-color: var(--topaz-6);box-shadow: 0 0 0 3px var(--topaz-1); }
+
+    .link-icon {
+      width: 32px; height: 32px;
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .link-icon svg { width: 15px; height: 15px; }
+
+    /* icon theming via parent colour class */
+    .c-teal  .link-icon { background: var(--p-40);    color: var(--p-100); }
+    .c-jade  .link-icon { background: var(--jade-1);  color: var(--jade-6); }
+    .c-lapis .link-icon { background: var(--lapis-1); color: var(--lapis-6); }
+    .c-olive .link-icon { background: var(--olive-1); color: var(--olive-6); }
+    .c-topaz .link-icon { background: var(--topaz-1); color: var(--topaz-6); }
+
+    .link-text strong { display: block; font-size: 14px; font-weight: 500; color: var(--n-120); margin-bottom: 2px; }
+    .link-text span   { font-size: 13px; color: var(--n-100); }
+
+    /* ── Footer ─────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--n-40);
+      padding: 24px 0 48px;
+      margin-top: 20px;
+      font-size: 13px; color: var(--n-100);
+    }
+
+    footer a { color: var(--p-90); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* ── Responsive ─────────────────────────────────────── */
+    @media (max-width: 600px) {
+      .hero h1 { font-size: 24px; }
+      .hero { padding: 36px 0 40px; }
+      .ceremony { flex-direction: column; gap: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <div class="wrapper">
+    <div class="header-inner">
+      <div class="logo-teal">
+        <svg viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M11 2C6.03 2 2 6.03 2 11s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9Zm0 3.5a3.25 3.25 0 1 1 0 6.5 3.25 3.25 0 0 1 0-6.5Zm0 11.75a6.75 6.75 0 0 1-5.08-2.3C6.8 13.9 8.78 13.25 11 13.25s4.2.65 5.08 1.7A6.75 6.75 0 0 1 11 17.25Z" fill="#2b5656"/>
+        </svg>
+      </div>
+      <div class="logo-wordmark">
+        Nourish UX/Design
+        <span>Starter Pack 2026</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="wrapper">
+    <div class="hero-tag" id="hero-tag">New starter</div>
+    <h1 id="welcome-heading">👋 Welcome to Nourish</h1>
+    <p>Everything you need to get settled, find your feet, and start doing great work with the team. Take the first week or two to learn the ropes, meet the team, and get comfortable with the product.</p>
+  </div>
+</div>
+
+<!-- Main -->
+<main>
+  <div class="wrapper">
+
+    <!-- Getting started -->
+    <section>
+      <div class="section-label">Getting started</div>
+
+      <h2>Your first two weeks</h2>
+      <p>Within your first few days, you'll have a <strong>Welcome call</strong> with your line manager (<span data-manager="ZS or Hamid">ZS or Hamid</span>), covering how Nourish works, your objectives, and introductions to the UX/Design team and your Product team PM.</p>
+      <p>You'll also have a brief intro call with HR and Finance to get the admin essentials sorted.</p>
+
+      <h2>In-office days</h2>
+      <p>We meet as a design team on the <strong>first Thursday of each month</strong> (adjustments are always communicated in advance). Locations rotate between Bournemouth, Birmingham, Bristol, London, and Oxford.</p>
+      <p>If you're travelling far or staying overnight, travel and hotel expenses are claimable — check with HR or Finance if unsure.</p>
+    </section>
+
+    <!-- UX Space -->
+    <section>
+      <div class="section-label">The UX space</div>
+
+      <p>We update each other on top priorities every <strong>Monday</strong> in our weekly UX Standup, or in our Teams chat. We also update <strong>Confluence</strong> as a central wiki.</p>
+      <p>We use the <strong>Team Noticeboard</strong> in FigJam for all UX/Design announcements — new team hires, upcoming design team day locations, and anything the wider team needs to know. Bookmark it early.</p>
+
+      <a class="noticeboard-callout" href="https://www.figma.com/board/Gyzg8zRl02dn8BupRyZqo8/Team-Noticeboard?node-id=0-1&t=2zMoQaQykShi8jqX-1" target="_blank">
+        <div class="noticeboard-icon">
+          <svg viewBox="0 0 18 18" fill="none"><rect x="2" y="2" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M5 6h8M5 9h6M5 12h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        </div>
+        <div class="noticeboard-body">
+          <strong>Team Noticeboard → Open in FigJam</strong>
+          <span>Your go-to board for team announcements, new starters, and design day dates.</span>
+        </div>
+      </a>
+
+      <h2>Design ceremonies</h2>
+      <p>Alongside Product team meetings, these are your regular design team touchpoints:</p>
+
+      <div class="ceremony-grid">
+        <div class="ceremony">
+          <div class="ceremony-freq">Weekly · Mon</div>
+          <div class="ceremony-body">
+            <strong>UX Standup</strong>
+            <span>Share your top priorities for the week. Quick, focused, async-friendly.</span>
+          </div>
+        </div>
+        <div class="ceremony">
+          <div class="ceremony-freq">Weekly · Thu</div>
+          <div class="ceremony-body">
+            <strong>Spotlight</strong>
+            <span>Timed design crit. Bring work you're proud of, stuck on, or want a second opinion on.</span>
+          </div>
+        </div>
+        <div class="ceremony">
+          <div class="ceremony-freq">Weekly · Thu</div>
+          <div class="ceremony-body">
+            <strong>Sandbox</strong>
+            <span>Senior UX/Design panel session for Pulse Design System items, blockers, and decisions.</span>
+          </div>
+        </div>
+        <div class="ceremony">
+          <div class="ceremony-freq">Quarterly</div>
+          <div class="ceremony-body">
+            <strong>Team Health Retro</strong>
+            <span>Anonymous team vote on how things are going, with space to discuss and improve.</span>
+          </div>
+        </div>
+      </div>
+
+      <h2>121s</h2>
+      <p>You'll have a <strong>fortnightly 121</strong> with your line manager (<span data-manager="ZS or Hamid">ZS or Hamid</span>) — a casual check-in to talk through how work is going and raise any concerns. Need something between 121s? Nudge us on Teams.</p>
+
+      <h2>Working hours</h2>
+      <p>Core hours are <strong>9–5, Mon–Fri</strong>. We are flexible as long as communication is timely, your Product team's needs are covered, and we can reach you when needed.</p>
+
+      <h2>Culture</h2>
+      <div class="info-box">
+        Our team is supportive and passionate — we share work early, ask for help often, and are encouraged to experiment. If you're ever unsure, stuck, or overwhelmed, please reach out. There's always someone eager to help.
+      </div>
+
+      <h2>Team wikis &amp; structure</h2>
+      <ul class="wiki-list">
+        <li><a href="https://nourishcare.atlassian.net/wiki/spaces/Design/overview" target="_blank">UX/Design team Wiki (Confluence)</a></li>
+        <li><a href="https://nourishcare.atlassian.net/wiki/spaces/Design/pages/531988506/Nourish+UX+Design+Playbook" target="_blank">Nourish UX/Design Playbook</a></li>
+        <li><a href="https://www.figma.com/board/LWH30w11pMH5vfKCp6MLjW/Design-Roles?node-id=0-1" target="_blank">Design roles &amp; team allocation (FigJam)</a></li>
+      </ul>
+    </section>
+
+    <hr class="divider" />
+
+    <!-- Tools & Links -->
+    <section>
+      <div class="section-label">Tools &amp; links</div>
+
+      <!-- Employee Admin — teal (primary) -->
+      <div class="tools-group c-teal">
+        <div class="tools-group-title">
+          <span class="dot c-teal"></span> Employee admin
+        </div>
+        <div class="link-list">
+          <a class="link-item" href="https://nourishcare.bamboohr.com/login.php" target="_blank">
+            <div class="link-icon"><svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" fill="currentColor"/><rect x="9" y="2" width="5" height="5" rx="1" fill="currentColor"/><rect x="2" y="9" width="5" height="5" rx="1" fill="currentColor"/><rect x="9" y="9" width="5" height="5" rx="1" fill="currentColor"/></svg></div>
+            <div class="link-text"><strong>BambooHR</strong><span>All your HR needs — time off, personal info, and more.</span></div>
+          </a>
+          <a class="link-item" href="https://members.yulife.com/login?region=UK" target="_blank">
+            <div class="link-icon"><svg viewBox="0 0 16 16" fill="none"><path d="M8 1l1.5 3.5H13L10.5 6.5l1 3.5L8 7.5 4.5 10l1-3.5L3 4.5h3.5L8 1Z" fill="currentColor"/></svg></div>
+            <div class="link-text"><strong>YuLife</strong><span>Employee rewards and perks.</span></div>
+          </a>
+          <a class="link-item" href="https://portal.clearooms.com/offices/23caa86d-c76a-4008-bcdb-277f55184650/hot-desks/2024-10-02" target="_blank">
+            <div class="link-icon"><svg viewBox="0 0 16 16" fill="none"><rect x="1" y="9" width="14" height="2" rx="1" fill="currentColor"/><rect x="3" y="5" width="10" height="4" rx="1" fill="currentColor"/><rect x="6" y="11" width="1.5" height="3" rx="0.5" fill="currentColor"/><rect x="8.5" y="11" width="1.5" height="3" rx="0.5" fill="currentColor"/></svg></div>
+            <div class="link-text"><strong>Clearooms</strong><span>Desk booking for office days.</span></div>
+          </a>
+          <a class="link-item" href="https://app.perk.com/login" target="_blank">
+            <div class="link-icon"><svg viewBox="0 0 16 16" fill="none"><path d="M3 4h10a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M8 4V3M8 12v1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+            <div class="link-text"><strong>Perk</strong><span>Book travel and hotels for company-expensed trips.</span></div>
+          </a>
+          <a class="link-item" href="https://eu.knowbe4.com/" target="_blank">
+            <div class="link-icon"><svg viewBox="0 0 16 16" fill="none"><path d="M8 1L2 4v4c0 3.3 2.5 6.4 6 7 3.5-.6 6-3.7 6-7V4L8 1Z" fill="currentColor" opacity="0.15"/><path d="M8 1L2 4v4c0 3.3 2.5 6.4 6 7 3.5-.6 6-3.7 6-7V4L8 1Z" stroke="currentColor" stroke-width="1.4" fill="none"/></svg></div>
+            <div class="link-text"><strong>KnowBe4</strong><span>IT and security training.</span></div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Product — Jade -->
+      <div class="tools-group c-jade">
+        <div class="tools-group-title">
+          <span class="dot c-jade"></span> Product
+        </div>
+        <div class="link-list">
+          <a class="link-item" href="https://nourishcare.atlassian.net/" target="_blank">
+            <div class="link-icon"><svg viewBox="0 0 16 16" fill="none"><path d="M8 1.5 2.5 8 8 10.5 13.5 8 8 1.5Z" fill="currentColor" opacity="0.3"/><path d="M2.5 8 8 14.5l5.5-6.5" stroke="currentColor" stroke-width="1.4" fill="none"/></svg></div>
+            <div class="link-text"><strong>Jira (Atlassian)</strong><span>Project management. Register with your Nourish email and request access.</span></div>
+          </a>
+          <a class="link-item" href="https://www.microsoft365.com/?auth=2&home=1" target="_blank">
+            <div class="link-icon"><svg viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6.5" height="6.5" rx="1" fill="currentColor" opacity="0.4"/><rect x="8.5" y="1" width="6.5" height="6.5" rx="1" fill="currentColor" opacity="0.7"/><rect x="1" y="8.5" width="6.5" height="6.5" rx="1" fill="currentColor" opacity="0.7"/><rect x="8.5" y="8.5" width="6.5" height="6.5" rx="1" fill="currentColor"/></svg></div>
+            <div class="link-text"><strong>Microsoft 365</strong><span>Main document repository.</span></div>
+          </a>
+          <a class="link-item" href="https://app.clickup.com/6657194/v/s/10876212" target="_blank">
+            <div class="link-icon"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5 6.5 12l6.5-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="link-text"><strong>ClickUp</strong><span>Alternative space to Jira. Invite in your inbox.</span></div>
+          </a>
+          <a class="link-item" href="https://miro.com/app/dashboard/" target="_blank">
+            <div class="link-icon"><svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M5 8h6M8 5v6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+            <div class="link-text"><strong>Miro</strong><span>Whiteboards. Register with your Nourish email and request access.</span></div>
+          </a>
+        </div>
+      </div>
+
+      <!-- UX/Design — Lapis -->
+      <div class="tools-group c-lapis">
+        <div class="tools-group-title">
+          <span class="dot c-lapis"></span> UX/Design
+          <span class="group-tag c-lapis">Design team</span>
+        </div>
+        <div class="link-list">
+          <a class="link-item" href="https://www.figma.com/downloads/" target="_blank">
+            <div class="link-icon"><svg viewBox="0 0 16 16" fill="none"><rect x="4" y="1" width="5" height="5" rx="2.5" fill="currentColor" opacity="0.4"/><rect x="4" y="8" width="5" height="5" rx="2.5" fill="currentColor" opacity="0.7"/><circle cx="11.5" cy="5.5" r="2.5" fill="currentColor" opacity="0.7"/><circle cx="11.5" cy="10.5" r="2.5" fill="currentColor"/></svg></div>
+            <div class="link-text"><strong>Figma</strong><span>Our primary design tool. Invite in your inbox.</span></div>
+          </a>
+          <a class="link-item" href="https://app.heymarvin.com/team/" target="_blank">
+            <div class="link-icon"><svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="6" r="3" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M3 14c0-3 2.2-5 5-5s5 2 5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg></div>
+            <div class="link-text"><strong>Marvin</strong><span>Research repository for user insights and findings.</span></div>
+          </a>
+          <a class="link-item" href="https://nourish.supernova-docs.io/" target="_blank">
+            <div class="link-icon"><svg viewBox="0 0 16 16" fill="none"><path d="M8 1l1.5 3.5H13L10.5 6.5l1 3.5L8 7.5 4.5 10l1-3.5L3 4.5h3.5L8 1Z" fill="currentColor"/></svg></div>
+            <div class="link-text"><strong>Pulse Design System</strong><span>Documentation for our design system — components, tokens, guidelines.</span></div>
+          </a>
+          <a class="link-item" href="https://app.uxcel.com/home" target="_blank">
+            <div class="link-icon"><svg viewBox="0 0 16 16" fill="none"><path d="M3 4h10v8H3V4Z" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M6 8h4M8 6v4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+            <div class="link-text"><strong>UXcel</strong><span>"Duolingo for design." Invite in your inbox.</span></div>
+          </a>
+          <a class="link-item" href="https://mobbin.com/discover/apps/ios/latest" target="_blank">
+            <div class="link-icon"><svg viewBox="0 0 16 16" fill="none"><rect x="4" y="1" width="8" height="14" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="12" r="1" fill="currentColor"/></svg></div>
+            <div class="link-text"><strong>Mobbin</strong><span>UI/UX library from 400k+ apps. Login via 1Password — request access from your line manager.</span></div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Demo Environments — Olive -->
+      <div class="tools-group c-olive">
+        <div class="tools-group-title">
+          <span class="dot c-olive"></span> Nourish demo environments
+          <span class="group-tag c-olive">Contact Rado for access</span>
+        </div>
+        <div class="link-list">
+          <a class="link-item" href="https://dev-org.nourishcare.co.uk/admin" target="_blank">
+            <div class="link-icon"><svg viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M5 3V2M11 3V2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M1 7h14" stroke="currentColor" stroke-width="1"/></svg></div>
+            <div class="link-text"><strong>Better Care Web</strong><span>dev-org.nourishcare.co.uk/admin</span></div>
+          </a>
+          <a class="link-item" href="https://bits.nourishcare.com/dashboard" target="_blank">
+            <div class="link-icon"><svg viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M4 8h8M4 11h5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></div>
+            <div class="link-text"><strong>Empower Web</strong><span>bits.nourishcare.com/dashboard</span></div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Sales Demo Videos — Topaz -->
+      <div class="tools-group c-topaz">
+        <div class="tools-group-title">
+          <span class="dot c-topaz"></span> Sales demo videos
+          <span class="group-tag c-topaz">Watch to understand the product</span>
+        </div>
+        <p style="font-size:14px;color:var(--n-100);margin-bottom:12px;">Watch these to get a feel for how Nourish is presented to customers — useful context for understanding the product and its value proposition.</p>
+        <div class="link-list">
+          <a class="link-item" href="https://app.jiminny.eu/export/RNZSA3U91SlOSj2cyaFAOT4AuaEH2KI1lCRKS3zSPkczEIk6fzdV05Rug" target="_blank">
+            <div class="link-icon"><svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M6.5 5.5l4 2.5-4 2.5V5.5Z" fill="currentColor"/></svg></div>
+            <div class="link-text"><strong>Grace Eyre Foundation Demo</strong></div>
+          </a>
+          <a class="link-item" href="https://app.jiminny.eu/export/8vOI1UW4uaEHGNIanfyES7nIlGSlipkc45s06hzSAOclpS2peaB5C8" target="_blank">
+            <div class="link-icon"><svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M6.5 5.5l4 2.5-4 2.5V5.5Z" fill="currentColor"/></svg></div>
+            <div class="link-text"><strong>Adult Services Demo</strong></div>
+          </a>
+          <a class="link-item" href="https://app.jiminny.eu/export/ddmiN2IlXiEnIwPtNrS4mUEHLbCyCrCweF1VcBNSNhLdhQ4jmwYuZ" target="_blank">
+            <div class="link-icon"><svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M6.5 5.5l4 2.5-4 2.5V5.5Z" fill="currentColor"/></svg></div>
+            <div class="link-text"><strong>Wright Care Demo</strong></div>
+          </a>
+          <a class="link-item" href="https://app.jiminny.eu/export/jNMhzDSnZTyNCrTV5fElI4AhkBhqpuoLHLgcdGinKULVS5qHr9n8JXc4" target="_blank">
+            <div class="link-icon"><svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M6.5 5.5l4 2.5-4 2.5V5.5Z" fill="currentColor"/></svg></div>
+            <div class="link-text"><strong>Alexander House Demo</strong></div>
+          </a>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+</main>
+
+<footer>
+  <div class="wrapper">
+    Nourish UX/Design · Internal use only · Updated 2026 ·
+    <a href="https://nourish.supernova-docs.io/latest/welcome-jQGCQoRd" target="_blank">Pulse Design System</a>
+  </div>
+</footer>
+
+</body>
+</html>
