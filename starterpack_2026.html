@@ -27,9 +27,8 @@
           const zsOnly    = el.getAttribute('data-manager-zs');
           const hamidOnly = el.getAttribute('data-manager-hamid');
 
-          if (manager === 'ZS'    && zsOnly)    el.textContent = zsOnly;
-          else if (manager === 'Hamid' && hamidOnly) el.textContent = hamidOnly;
-          else if (both)                             el.textContent = both;
+          if (manager) el.textContent = manager;
+          else if (both) el.textContent = both;
         });
       });
     })();
