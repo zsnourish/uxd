@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Starter Pack 2026 — Nourish UX/Design</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script>
+    (function () {
+      const params = new URLSearchParams(window.location.search);
+      const name    = params.get('name')    ? decodeURIComponent(params.get('name'))    : null;
+      const manager = params.get('manager') ? decodeURIComponent(params.get('manager')) : null;
+
+      document.addEventListener('DOMContentLoaded', function () {
+        if (name) {
+          const h1 = document.getElementById('welcome-heading');
+          if (h1) h1.textContent = '👋 Welcome to Nourish, ' + name;
+          const eyebrow = document.getElementById('welcome-eyebrow');
+          if (eyebrow) eyebrow.innerHTML = eyebrow.innerHTML.replace('Welcome', 'Welcome, ' + name);
+        }
+
+        const managerEls = document.querySelectorAll('[data-manager]');
+        managerEls.forEach(function (el) {
+          const both      = el.getAttribute('data-manager');
+          const zsOnly    = el.getAttribute('data-manager-zs');
+          const hamidOnly = el.getAttribute('data-manager-hamid');
+
+          if (manager === 'ZS'    && zsOnly)    el.textContent = zsOnly;
+          else if (manager === 'Hamid' && hamidOnly) el.textContent = hamidOnly;
+          else if (both)                             el.textContent = both;
+        });
+      });
+    })();
+  </script>
+  <style>
+    /* ── Tokens ─────────────────────────────────────────── */
+    :root {
+      /* Nourish green — Employee admin, Product */
+      --green-primary: #00875A;
+      --green-light:   #E3F5EF;
+
+      /* Pulse purple — UX/Design */
+      --purple-primary: #6E40C9;
+      --purple-light:   #EDE9FB;
+
+      /* Amber — Demo environments */
+      --amber-primary: #B45309;
+      --amber-light:   #FEF3C7;
+
+      /* Slate blue — Sales demos */
+      --slate-primary: #1D4ED8;
+      --slate-light:   #EFF6FF;
+
+      --ink:       #111827;
+      --ink-mid:   #374151;
+      --ink-soft:  #6B7280;
+      --border:    #E5E7EB;
+      --surface:   #FFFFFF;
+      --bg:        #F9FAFB;
+      --radius:    10px;
+      --radius-sm: 6px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.65;
+    }
+
+    /* ── Layout ─────────────────────────────────────────── */
+    .wrapper { max-width: 760px; margin: 0 auto; padding: 0 24px; }
+
+    /* ── Header ─────────────────────────────────────────── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 0;
+    }
+
+    .header-inner { display: flex; align-items: center; gap: 14px; }
+
+    .logo-mark {
+      width: 36px; height: 36px;
+      background: var(--green-primary);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .logo-mark svg { width: 20px; height: 20px; }
+
+    .header-text { line-height: 1.2; }
+    .header-text .org   { font-size: 11px; font-weight: 500; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.06em; }
+    .header-text .title { font-family: 'DM Sans', sans-serif; font-size: 17px; font-weight: 600; color: var(--ink); }
+
+    /* ── Hero ───────────────────────────────────────────── */
+    .hero { padding: 56px 0 40px; }
+
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 12px; font-weight: 500;
+      color: var(--green-primary); background: var(--green-light);
+      border-radius: 20px; padding: 4px 12px; margin-bottom: 20px;
+    }
+
+    .hero h1 {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 36px; font-weight: 600; line-height: 1.2;
+      color: var(--ink); margin-bottom: 16px;
+    }
+
+    .hero p { font-size: 16px; color: var(--ink-mid); max-width: 560px; }
+
+    /* ── Section ────────────────────────────────────────── */
+    section { margin-bottom: 48px; }
+
+    .section-label {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--ink-soft);
+      margin-bottom: 20px; padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    h2 {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 20px; font-weight: 600; color: var(--ink);
+      margin-bottom: 10px; margin-top: 28px;
+    }
+    h2:first-of-type { margin-top: 0; }
+
+    p { font-size: 15px; color: var(--ink-mid); margin-bottom: 14px; }
+
+    /* ── Noticeboard callout ────────────────────────────── */
+    .noticeboard-callout {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      background: var(--surface);
+      border: 1.5px solid var(--green-primary);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      margin: 16px 0 20px;
+      text-decoration: none;
+      transition: box-shadow 0.15s;
+    }
+    .noticeboard-callout:hover {
+      box-shadow: 0 0 0 3px var(--green-light);
+    }
+    .noticeboard-icon {
+      width: 36px; height: 36px;
+      background: var(--green-light);
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      color: var(--green-primary);
+    }
+    .noticeboard-icon svg { width: 18px; height: 18px; }
+    .noticeboard-body strong {
+      display: block;
+      font-size: 14px; font-weight: 600; color: var(--green-primary);
+      margin-bottom: 3px;
+    }
+    .noticeboard-body span { font-size: 13px; color: var(--ink-mid); }
+
+    /* ── Ceremony Cards ─────────────────────────────────── */
+    .ceremony-grid { display: grid; gap: 10px; margin-top: 14px; }
+
+    .ceremony {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      display: flex; gap: 14px; align-items: flex-start;
+    }
+
+    .ceremony-freq {
+      background: var(--green-light);
+      color: var(--green-primary);
+      font-size: 11px; font-weight: 600;
+      border-radius: var(--radius-sm);
+      padding: 3px 8px;
+      white-space: nowrap; flex-shrink: 0; margin-top: 2px;
+    }
+
+    .ceremony-body strong { display: block; font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 3px; }
+    .ceremony-body span   { font-size: 13px; color: var(--ink-soft); }
+
+    /* ── Link cards ─────────────────────────────────────── */
+    .link-list { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+
+    .link-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      text-decoration: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    /* colour variants for hover + icon per group */
+    .link-item.green:hover  { border-color: var(--green-primary);  box-shadow: 0 0 0 3px var(--green-light); }
+    .link-item.purple:hover { border-color: var(--purple-primary); box-shadow: 0 0 0 3px var(--purple-light); }
+    .link-item.amber:hover  { border-color: var(--amber-primary);  box-shadow: 0 0 0 3px var(--amber-light); }
+    .link-item.slate:hover  { border-color: var(--slate-primary);  box-shadow: 0 0 0 3px var(--slate-light); }
+
+    .link-icon {
+      width: 32px; height: 32px;
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .link-icon svg { width: 16px; height: 16px; }
+
+    /* icon colour per group */
+    .link-item.green  .link-icon { background: var(--green-light);  color: var(--green-primary); }
+    .link-item.purple .link-icon { background: var(--purple-light); color: var(--purple-primary); }
+    .link-item.amber  .link-icon { background: var(--amber-light);  color: var(--amber-primary); }
+    .link-item.slate  .link-icon { background: var(--slate-light);  color: var(--slate-primary); }
+
+    .link-text strong { display: block; font-size: 14px; font-weight: 500; color: var(--ink); margin-bottom: 2px; }
+    .link-text span   { font-size: 13px; color: var(--ink-soft); }
+
+    /* ── Tools group headers ────────────────────────────── */
+    .tools-group { margin-bottom: 32px; }
+
+    .tools-group-title {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px; font-weight: 600; color: var(--ink);
+      margin-bottom: 10px;
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .dot.green  { background: var(--green-primary); }
+    .dot.purple { background: var(--purple-primary); }
+    .dot.amber  { background: var(--amber-primary); }
+    .dot.slate  { background: var(--slate-primary); }
+
+    /* ── Colour tags on group titles ────────────────────── */
+    .group-tag {
+      font-size: 11px; font-weight: 500;
+      border-radius: 20px; padding: 2px 8px;
+      margin-left: 4px;
+    }
+    .group-tag.purple { background: var(--purple-light); color: var(--purple-primary); }
+    .group-tag.amber  { background: var(--amber-light);  color: var(--amber-primary); }
+    .group-tag.slate  { background: var(--slate-light);  color: var(--slate-primary); }
+
+    /* ── Wiki list ──────────────────────────────────────── */
+    .wiki-list { list-style: none; display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+
+    .wiki-list li a {
+      font-size: 14px; color: var(--green-primary);
+      text-decoration: none;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .wiki-list li a:hover { text-decoration: underline; }
+    .wiki-list li a::before {
+      content: ''; display: inline-block;
+      width: 4px; height: 4px;
+      background: var(--green-primary); border-radius: 50%;
+    }
+
+    /* ── Info box ───────────────────────────────────────── */
+    .info-box {
+      background: var(--green-light);
+      border-left: 3px solid var(--green-primary);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      padding: 14px 16px;
+      font-size: 14px; color: var(--ink-mid);
+      margin: 16px 0;
+    }
+
+    /* ── Divider ────────────────────────────────────────── */
+    .divider { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+
+    /* ── Footer ─────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 28px 0 48px;
+      font-size: 13px; color: var(--ink-soft);
+    }
+
+    /* ── Responsive ─────────────────────────────────────── */
+    @media (max-width: 600px) {
+      .hero h1 { font-size: 26px; }
+      .ceremony { flex-direction: column; gap: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <div class="wrapper">
+    <div class="header-inner">
+      <div class="logo-mark">
+        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M10 2C5.58 2 2 5.58 2 10s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8Zm0 3a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 10.5a6 6 0 0 1-4.5-2.03C6.18 12.56 7.98 12 10 12s3.82.56 4.5 1.47A6 6 0 0 1 10 15.5Z" fill="white"/>
+        </svg>
+      </div>
+      <div class="header-text">
+        <div class="org">Nourish UX/Design</div>
+        <div class="title">Starter Pack 2026</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Main -->
+<main>
+  <div class="wrapper">
+
+    <!-- Hero -->
+    <div class="hero">
+      <div class="hero-eyebrow" id="welcome-eyebrow">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M6 1L7.5 4.5H11L8.5 6.5 9.5 10 6 7.5 2.5 10 3.5 6.5 1 4.5H4.5L6 1Z" fill="currentColor"/>
+        </svg>
+        Welcome
+      </div>
+      <h1 id="welcome-heading">👋 Welcome to Nourish</h1>
+      <p>Everything you need to get settled, find your feet, and start doing great work with the team. Take the first week or two to learn the ropes, meet the team, and get comfortable with the product.</p>
+    </div>
+
+    <!-- Getting started -->
+    <section>
+      <div class="section-label">Getting started</div>
+
+      <h2>Your first two weeks</h2>
+      <p>Within your first few days, you'll have a <strong>Welcome call</strong> with your line manager (<span data-manager="ZS or Hamid" data-manager-zs="ZS" data-manager-hamid="Hamid">ZS or Hamid</span>), covering how Nourish works, your objectives, and introductions to the UX/Design team and your Product team PM.</p>
+      <p>You'll also have a brief intro call with HR and Finance to get the admin essentials sorted.</p>
+
+      <h2>In-office days</h2>
+      <p>We meet as a design team on the <strong>first Thursday of each month</strong> (adjustments are always communicated in advance). Locations rotate between Bournemouth, Birmingham, Bristol, London, and Oxford.</p>
+      <p>If you're travelling far or staying overnight, travel and hotel expenses are claimable — check with HR or Finance if unsure.</p>
+    </section>
+
+    <hr class="divider" />
+
+    <!-- UX Space -->
+    <section>
+      <div class="section-label">The UX space</div>
+
+      <p>We update each other on top priorities every <strong>Monday</strong> in our weekly UX Standup, or in our Teams chat. We also update <strong>Confluence</strong> as a central wiki.</p>
+
+      <p>We use the <strong>Team Noticeboard</strong> in FigJam for all UX/Design announcements — new team hires, upcoming design team day locations, and anything the wider team needs to know. Bookmark it early.</p>
+
+      <a class="noticeboard-callout" href="https://www.figma.com/board/Gyzg8zRl02dn8BupRyZqo8/Team-Noticeboard?node-id=0-1&t=2zMoQaQykShi8jqX-1" target="_blank">
+        <div class="noticeboard-icon">
+          <svg viewBox="0 0 18 18" fill="none"><rect x="2" y="2" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M5 6h8M5 9h6M5 12h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        </div>
+        <div class="noticeboard-body">
+          <strong>Team Noticeboard → FigJam</strong>
+          <span>Your go-to board for team announcements, new starters, and design day dates.</span>
+        </div>
+      </a>
+
+      <h2>Design ceremonies</h2>
+      <p>Alongside Product team meetings, these are your regular design team touchpoints:</p>
+
+      <div class="ceremony-grid">
+        <div class="ceremony">
+          <div class="ceremony-freq">Weekly · Mon</div>
+          <div class="ceremony-body">
+            <strong>UX Standup</strong>
+            <span>Share your top priorities for the week. Quick, focused, async-friendly.</span>
+          </div>
+        </div>
+        <div class="ceremony">
+          <div class="ceremony-freq">Weekly · Thu</div>
+          <div class="ceremony-body">
+            <strong>Spotlight</strong>
+            <span>Timed design crit. Bring work you're proud of, stuck on, or want a second opinion on.</span>
+          </div>
+        </div>
+        <div class="ceremony">
+          <div class="ceremony-freq">Weekly · Thu</div>
+          <div class="ceremony-body">
+            <strong>Sandbox</strong>
+            <span>Senior UX/Design panel session for Pulse Design System items, blockers, and decisions.</span>
+          </div>
+        </div>
+        <div class="ceremony">
+          <div class="ceremony-freq">Quarterly</div>
+          <div class="ceremony-body">
+            <strong>Team Health Retro</strong>
+            <span>Anonymous team vote on how things are going, with space to discuss and improve.</span>
+          </div>
+        </div>
+      </div>
+
+      <h2>121s</h2>
+      <p>You'll have a <strong>fortnightly 121</strong> with your line manager (<span data-manager="ZS or Hamid" data-manager-zs="ZS" data-manager-hamid="Hamid">ZS or Hamid</span>) — a casual check-in to talk through how work is going and raise any concerns. Need something between 121s? Nudge us on Teams.</p>
+
+      <h2>Working hours</h2>
+      <p>Core hours are <strong>9–5, Mon–Fri</strong>. We are flexible as long as communication is timely, your Product team's needs are covered, and we can reach you when needed.</p>
+
+      <h2>Culture</h2>
+      <div class="info-box">
+        Our team is supportive and passionate — we share work early, ask for help often, and are encouraged to experiment. If you're ever unsure, stuck, or overwhelmed, please reach out. There's always someone eager to help.
+      </div>
+
+      <h2>Team wikis &amp; structure</h2>
+      <ul class="wiki-list">
+        <li><a href="https://nourishcare.atlassian.net/wiki/spaces/Design/overview" target="_blank">UX/Design team Wiki (Confluence)</a></li>
+        <li><a href="https://nourishcare.atlassian.net/wiki/spaces/Design/pages/531988506/Nourish+UX+Design+Playbook" target="_blank">Nourish UX/Design Playbook</a></li>
+        <li><a href="https://www.figma.com/board/LWH30w11pMH5vfKCp6MLjW/Design-Roles?node-id=0-1" target="_blank">Design roles &amp; team allocation (FigJam)</a></li>
+      </ul>
+    </section>
+
+    <hr class="divider" />
+
+    <!-- Tools & Links -->
+    <section>
+      <div class="section-label">Tools &amp; links</div>
+
+      <!-- Employee Admin -->
+      <div class="tools-group">
+        <div class="tools-group-title"><span class="dot green"></span> Employee admin</div>
+        <div class="link-list">
+
+          <a class="link-item green" href="https://nourishcare.bamboohr.com/login.php" target="_blank">
+            <div class="link-icon">
+              <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" fill="currentColor"/><rect x="9" y="2" width="5" height="5" rx="1" fill="currentColor"/><rect x="2" y="9" width="5" height="5" rx="1" fill="currentColor"/><rect x="9" y="9" width="5" height="5" rx="1" fill="currentColor"/></svg>
+            </div>
+            <div class="link-text">
+              <strong>BambooHR</strong>
+              <span>All your HR needs — time off, personal info, and more.</span>
+            </div>
+          </a>
+
+          <a class="link-item green" href="https://members.yulife.com/login?region=UK" target="_blank">
+            <div class="link-icon">
+              <svg viewBox="0 0 16 16" fill="none"><path d="M8 1l1.5 3.5H13L10.5 6.5l1 3.5L8 7.5 4.5 10l1-3.5L3 4.5h3.5L8 1Z" fill="currentColor"/></svg>
+            </div>
+            <div class="link-text">
+              <strong>YuLife</strong>
+              <span>Employee rewards and perks.</span>
+            </div>
+          </a>
+
+          <a class="link-item green" href="https://portal.clearooms.com/offices/23caa86d-c76a-4008-bcdb-277f55184650/hot-desks/2024-10-02" target="_blank">
+            <div class="link-icon">
+              <svg viewBox="0 0 16 16" fill="none"><rect x="1" y="9" width="14" height="2" rx="1" fill="currentColor"/><rect x="3" y="5" width="10" height="4" rx="1" fill="currentColor"/><rect x="6" y="11" width="1.5" height="3" rx="0.5" fill="currentColor"/><rect x="8.5" y="11" width="1.5" height="3" rx="0.5" fill="currentColor"/></svg>
+            </div>
+            <div class="link-text">
+              <strong>Clearooms</strong>
+              <span>Desk booking for office days.</span>
+            </div>
+          </a>
+
+          <a class="link-item green" href="https://app.perk.com/login" target="_blank">
+            <div class="link-icon">
+              <svg viewBox="0 0 16 16" fill="none"><path d="M3 4h10a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M8 4V3M8 12v1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </div>
+            <div class="link-text">
+              <strong>Perk</strong>
+              <span>Book travel and hotels for company-expensed trips.</span>
+            </div>
+          </a>
+
+          <a class="link-item green" href="https://eu.knowbe4.com/" target="_blank">
+            <div class="link-icon">
+              <svg viewBox="0 0 16 16" fill="none"><path d="M8 1L2 4v4c0 3.3 2.5 6.4 6 7 3.5-.6 6-3.7 6-7V4L8 1Z" fill="currentColor" opacity="0.15"/><path d="M8 1L2 4v4c0 3.3 2.5 6.4 6 7 3.5-.6 6-3.7 6-7V4L8 1Z" stroke="currentColor" stroke-width="1.4" fill="none"/></svg>
+            </div>
+            <div class="link-text">
+              <strong>KnowBe4</strong>
+              <span>IT and security training.</span>
+            </div>
+          </a>
+
+        </div>
+      </div>
+
+      <!-- Product -->
+      <div class="tools-group">
+        <div class="tools-group-title"><span class="dot green"></span> Product</div>
+        <div class="link-list">
+
+          <a class="link-item green" href="https://nourishcare.atlassian.net/" target="_blank">
+            <div class="link-icon">
+              <svg viewBox="0 0 16 16" fill="none"><path d="M8 1.5 2.5 8 8 10.5 13.5 8 8 1.5Z" fill="currentColor" opacity="0.3"/><path d="M2.5 8 8 14.5l5.5-6.5" stroke="currentColor" stroke-width="1.4" fill="none"/></svg>
+            </div>
+            <div class="link-text">
+              <strong>Jira (Atlassian)</strong>
+              <span>Project management. Register with your Nourish email and request access.</span>
+            </div>
+          </a>
+
+          <a class="link-item green" href="https://www.microsoft365.com/?auth=2&home=1" target="_blank">
+            <div class="link-icon">
+              <svg viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6.5" height="6.5" rx="1" fill="currentColor" opacity="0.4"/><rect x="8.5" y="1" width="6.5" height="6.5" rx="1" fill="currentColor" opacity="0.7"/><rect x="1" y="8.5" width="6.5" height="6.5" rx="1" fill="currentColor" opacity="0.7"/><rect x="8.5" y="8.5" width="6.5" height="6.5" rx="1" fill="currentColor"/></svg>
+            </div>
+            <div class="link-text">
+              <strong>Microsoft 365</strong>
+              <span>Main document repository.</span>
+            </div>
+          </a>
+
+          <a class="link-item green" href="https://app.clickup.com/6657194/v/s/10876212" target="_blank">
+            <div class="link-icon">
+              <svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5 6.5 12l6.5-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="link-text">
+              <strong>ClickUp</strong>
+              <span>Alternative space to Jira. Invite in your inbox.</span>
+            </div>
+          </a>
+
+          <a class="link-item green" href="https://miro.com/app/dashboard/" target="_blank">
+            <div class="link-icon">
+              <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M5 8h6M8 5v6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </div>
+            <div class="link-text">
+              <strong>Miro</strong>
+              <span>Whiteboards. Register with your Nourish email and request access.</span>
+            </div>
+          </a>
+
+        </div>
+      </div>
+
+      <!-- UX/Design — purple -->
+      <div class="tools-group">
+        <div class="tools-group-title">
+          <span class="dot purple"></span> UX/Design
+          <span class="group-tag purple">Design team</span>
+        </div>
+        <div class="link-list">
+
+          <a class="link-item purple" href="https://www.figma.com/downloads/" target="_blank">
+            <div class="link-icon">
+              <svg viewBox="0 0 16 16" fill="none"><rect x="4" y="1" width="5" height="5" rx="2.5" fill="currentColor" opacity="0.4"/><rect x="4" y="8" width="5" height="5" rx="2.5" fill="currentColor" opacity="0.7"/><circle cx="11.5" cy="5.5" r="2.5" fill="currentColor" opacity="0.7"/><circle cx="11.5" cy="10.5" r="2.5" fill="currentColor"/></svg>
+            </div>
+            <div class="link-text">
+              <strong>Figma</strong>
+              <span>Our primary design tool. Invite in your inbox.</span>
+            </div>
+          </a>
+
+          <a class="link-item purple" href="https://app.heymarvin.com/team/" target="_blank">
+            <div class="link-icon">
+              <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="6" r="3" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M3 14c0-3 2.2-5 5-5s5 2 5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>
+            </div>
+            <div class="link-text">
+              <strong>Marvin</strong>
+              <span>Research repository for user insights and findings.</span>
+            </div>
+          </a>
+
+          <a class="link-item purple" href="https://nourish.supernova-docs.io/" target="_blank">
+            <div class="link-icon">
+              <svg viewBox="0 0 16 16" fill="none"><path d="M8 1l1.5 3.5H13L10.5 6.5l1 3.5L8 7.5 4.5 10l1-3.5L3 4.5h3.5L8 1Z" fill="currentColor"/></svg>
+            </div>
+            <div class="link-text">
+              <strong>Pulse Design System</strong>
+              <span>Documentation for our design system — components, tokens, guidelines.</span>
+            </div>
+          </a>
+
+          <a class="link-item purple" href="https://app.uxcel.com/home" target="_blank">
+            <div class="link-icon">
+              <svg viewBox="0 0 16 16" fill="none"><path d="M3 4h10v8H3V4Z" stroke="currentColor" stroke-width="1.4" fill="none" rx="1"/><path d="M6 8h4M8 6v4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            </div>
+            <div class="link-text">
+              <strong>UXcel</strong>
+              <span>"Duolingo for design." Invite in your inbox.</span>
+            </div>
+          </a>
+
+          <a class="link-item purple" href="https://mobbin.com/discover/apps/ios/latest" target="_blank">
+            <div class="link-icon">
+              <svg viewBox="0 0 16 16" fill="none"><rect x="4" y="1" width="8" height="14" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="12" r="1" fill="currentColor"/></svg>
+            </div>
+            <div class="link-text">
+              <strong>Mobbin</strong>
+              <span>UI/UX library from 400k+ apps. Login via 1Password — request access from your line manager.</span>
+            </div>
+          </a>
+
+        </div>
+      </div>
+
+      <!-- Demo Environments — amber -->
+      <div class="tools-group">
+        <div class="tools-group-title">
+          <span class="dot amber"></span> Nourish demo environments
+          <span class="group-tag amber">Contact Rado for access</span>
+        </div>
+        <div class="link-list">
+
+          <a class="link-item amber" href="https://dev-org.nourishcare.co.uk/admin" target="_blank">
+            <div class="link-icon">
+              <svg viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M5 3V2M11 3V2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M1 7h14" stroke="currentColor" stroke-width="1"/></svg>
+            </div>
+            <div class="link-text">
+              <strong>Better Care Web</strong>
+              <span>dev-org.nourishcare.co.uk/admin</span>
+            </div>
+          </a>
+
+          <a class="link-item amber" href="https://bits.nourishcare.com/dashboard" target="_blank">
+            <div class="link-icon">
+              <svg viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M4 8h8M4 11h5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+            </div>
+            <div class="link-text">
+              <strong>Empower Web</strong>
+              <span>bits.nourishcare.com/dashboard</span>
+            </div>
+          </a>
+
+        </div>
+      </div>
+
+      <!-- Sales Demo Videos — slate blue -->
+      <div class="tools-group">
+        <div class="tools-group-title">
+          <span class="dot slate"></span> Sales demo videos
+          <span class="group-tag slate">Watch to understand the product</span>
+        </div>
+        <p style="font-size:14px; color:var(--ink-soft); margin-bottom: 12px;">Watch these to get a feel for how Nourish is presented to customers — useful context for understanding the product and its value proposition.</p>
+        <div class="link-list">
+
+          <a class="link-item slate" href="https://app.jiminny.eu/export/RNZSA3U91SlOSj2cyaFAOT4AuaEH2KI1lCRKS3zSPkczEIk6fzdV05Rug" target="_blank">
+            <div class="link-icon">
+              <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M6.5 5.5l4 2.5-4 2.5V5.5Z" fill="currentColor"/></svg>
+            </div>
+            <div class="link-text"><strong>Grace Eyre Foundation Demo</strong></div>
+          </a>
+
+          <a class="link-item slate" href="https://app.jiminny.eu/export/8vOI1UW4uaEHGNIanfyES7nIlGSlipkc45s06hzSAOclpS2peaB5C8" target="_blank">
+            <div class="link-icon">
+              <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M6.5 5.5l4 2.5-4 2.5V5.5Z" fill="currentColor"/></svg>
+            </div>
+            <div class="link-text"><strong>Adult Services Demo</strong></div>
+          </a>
+
+          <a class="link-item slate" href="https://app.jiminny.eu/export/ddmiN2IlXiEnIwPtNrS4mUEHLbCyCrCweF1VcBNSNhLdhQ4jmwYuZ" target="_blank">
+            <div class="link-icon">
+              <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M6.5 5.5l4 2.5-4 2.5V5.5Z" fill="currentColor"/></svg>
+            </div>
+            <div class="link-text"><strong>Wright Care Demo</strong></div>
+          </a>
+
+          <a class="link-item slate" href="https://app.jiminny.eu/export/jNMhzDSnZTyNCrTV5fElI4AhkBhqpuoLHLgcdGinKULVS5qHr9n8JXc4" target="_blank">
+            <div class="link-icon">
+              <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M6.5 5.5l4 2.5-4 2.5V5.5Z" fill="currentColor"/></svg>
+            </div>
+            <div class="link-text"><strong>Alexander House Demo</strong></div>
+          </a>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div><!-- /wrapper -->
+</main>
+
+<footer>
+  <div class="wrapper">
+    Nourish UX/Design · Internal use only · Updated 2026
+  </div>
+</footer>
+
+</body>
+</html>
