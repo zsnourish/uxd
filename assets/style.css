@@ -1,0 +1,130 @@
+/* ─────────────────────────────────────────────────────
+   PULSE DESIGN TOKENS — shared with starterpack.html
+   Primary (teal): #66cccc brand, #2b5656 CTA/dark, #3e7e7e mid
+   Neutral: #36393f body, #51555e mid, #9fa5b1 muted, #e7e8eb border,
+            #f3f4f5 subtle bg, #f9f9fa page bg, #ffffff surface
+   Accent – Lapis (UX): #4c4ba0 / #ededf5
+   Accent – Topaz (org/company): #027cb7 / #e6f5fc
+   Accent – Olive (external/non-Nourish): #717f2d / #f4f5eb
+   Accent – Jade (misc): #627e76 / #e5ebea
+───────────────────────────────────────────────────── */
+:root {
+  --p-100: #2b5656; --p-90: #3e7e7e; --p-80: #52a5a5; --p-70: #66cccc;
+  --p-40: #c2ebeb; --p-20: #e0f5f5; --p-10: #f0fafa;
+
+  --n-120: #36393f; --n-110: #51555e; --n-100: #6c727e; --n-70: #b7bbc4;
+  --n-50: #dbdde2; --n-40: #e7e8eb; --n-30: #f3f4f5; --n-20: #f9f9fa; --n-10: #ffffff;
+
+  --lapis-6: #4c4ba0; --lapis-1: #dbdbec; --lapis-05: #ededf5;
+  --topaz-6: #027cb7; --topaz-1: #cdebfa; --topaz-05: #e6f5fc;
+  --olive-6: #717f2d; --olive-1: #e8ecd7; --olive-05: #f4f5eb;
+  --jade-6: #627e76; --jade-1: #e5ebea; --jade-05: #f2f5f4;
+
+  --red-6: #b3423a; --red-1: #f6dedc;
+
+  --radius: 8px;
+  --radius-sm: 5px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  background: var(--n-20);
+  color: var(--n-120);
+}
+
+a { color: var(--p-100); }
+
+.wrap { max-width: 880px; margin: 0 auto; padding: 40px 24px 80px; }
+
+header.site {
+  border-bottom: 1px solid var(--n-40);
+  background: var(--n-10);
+}
+header.site .wrap { padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; }
+.brand { font-family: Georgia, serif; font-weight: 700; font-size: 20px; color: var(--p-100); }
+.brand span { color: var(--n-100); font-family: 'Inter', sans-serif; font-weight: 500; font-size: 14px; margin-left: 8px; }
+
+nav.tabs { display: flex; gap: 4px; }
+nav.tabs a {
+  text-decoration: none;
+  color: var(--n-110);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+}
+nav.tabs a:hover { background: var(--n-30); }
+nav.tabs a.active { background: var(--p-10); color: var(--p-100); }
+
+h1.page-title { font-family: Georgia, serif; font-size: 28px; margin: 0 0 4px; color: var(--p-100); }
+p.page-sub { color: var(--n-100); font-size: 14px; margin: 0 0 32px; }
+
+.state { padding: 16px; border-radius: var(--radius); background: var(--n-30); color: var(--n-100); font-size: 14px; }
+.state.error { background: var(--red-1); color: var(--red-6); }
+
+/* Updates feed */
+.update-card {
+  background: var(--n-10);
+  border: 1px solid var(--n-40);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  margin-bottom: 12px;
+}
+.update-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+.pill {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--lapis-05); color: var(--lapis-6);
+}
+.pill.action { background: var(--red-1); color: var(--red-6); }
+.update-date { font-size: 13px; color: var(--n-100); }
+.update-body { font-size: 15px; line-height: 1.5; color: var(--n-120); }
+.update-body b, .update-body strong { color: var(--n-120); }
+
+/* Team events */
+.month-heading {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--n-100);
+  margin: 28px 0 10px;
+}
+.month-heading:first-child { margin-top: 0; }
+
+.event-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  background: var(--n-10);
+  border: 1px solid var(--n-40);
+  border-left: 4px solid var(--lapis-6);
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+}
+.event-row.category-org { border-left-color: var(--topaz-6); }
+.event-row.category-external { border-left-color: var(--olive-6); }
+.event-row.past { opacity: 0.45; }
+.event-row.past .event-purpose { text-decoration: line-through; }
+
+.event-date { font-size: 13px; font-weight: 600; color: var(--n-110); min-width: 84px; }
+.event-body { flex: 1; }
+.event-purpose { font-size: 15px; font-weight: 600; color: var(--n-120); }
+.event-location { font-size: 13px; color: var(--n-100); margin-top: 2px; }
+.event-notes { font-size: 13px; color: var(--n-100); margin-top: 4px; font-style: italic; }
+
+.legend { display: flex; gap: 18px; margin-bottom: 24px; flex-wrap: wrap; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--n-100); }
+.legend-swatch { width: 12px; height: 12px; border-radius: 3px; }
+.legend-swatch.team { background: var(--lapis-6); }
+.legend-swatch.org { background: var(--topaz-6); }
+.legend-swatch.external { background: var(--olive-6); }
+
+footer.site { text-align: center; font-size: 12px; color: var(--n-70); padding: 32px 0; }

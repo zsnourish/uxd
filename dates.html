@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Team Dates — Nourish UX/Design</title>
+  <link rel="stylesheet" href="/assets/style.css" />
+</head>
+<body>
+  <header class="site">
+    <div class="wrap">
+      <div class="brand">Team Noticeboard <span>Nourish UX/Design</span></div>
+      <nav class="tabs">
+        <a href="/">Updates</a>
+        <a href="/dates.html" class="active">Team Dates</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <h1 class="page-title">Team Events</h1>
+    <p class="page-sub">Team days, kickoffs and events — synced from Notion.</p>
+
+    <div class="legend">
+      <div class="legend-item"><span class="legend-swatch team"></span>Other UX/Design team events</div>
+      <div class="legend-item"><span class="legend-swatch org"></span>Nourish org events</div>
+      <div class="legend-item"><span class="legend-swatch external"></span>Non-Nourish events</div>
+    </div>
+
+    <div id="content">
+      <div class="state">Loading events…</div>
+    </div>
+  </main>
+
+  <footer class="site">Synced from the Team Events database in Notion.</footer>
+
+  <script>
+    const CATEGORY_CLASS = {
+      'Nourish org events': 'category-org',
+      'Non-Nourish events': 'category-external'
+    };
+
+    async function loadEvents() {
+      const el = document.getElementById('content');
+      try {
+        const res = await fetch('/.netlify/functions/events');
+        if (!res.ok) throw new Error('Request failed: ' + res.status);
+        const data = await res.json();
+        if (!data.length) {
+          el.innerHTML = '<div class="state">No events yet.</div>';
+          return;
+        }
+        data.sort((a, b) => new Date(a.dateStart) - new Date(b.dateStart));
+        el.innerHTML = renderGrouped(data);
+      } catch (err) {
+        el.innerHTML = '<div class="state error">Couldn\'t load events right now (' + err.message + '). Check that the Netlify function is deployed and NOTION_TOKEN is set.</div>';
+      }
+    }
+
+    function renderGrouped(events) {
+      const today = new Date(); today.setHours(0,0,0,0);
+      let html = '';
+      let currentMonth = '';
+      events.forEach(item => {
+        const d = new Date(item.dateStart);
+        const monthLabel = d.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+        if (monthLabel !== currentMonth) {
+          html += '<div class="month-heading">' + monthLabel + '</div>';
+          currentMonth = monthLabel;
+        }
+        html += renderRow(item, d, today);
+      });
+      return html;
+    }
+
+    function renderRow(item, d, today) {
+      const isPast = d < today;
+      const catClass = CATEGORY_CLASS[item.category] || '';
+      const dateLabel = item.dateEnd && item.dateEnd !== item.dateStart
+        ? d.getDate() + '–' + new Date(item.dateEnd).getDate() + ' ' + d.toLocaleDateString('en-GB', { month: 'short' })
+        : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+      return (
+        '<div class="event-row ' + catClass + (isPast ? ' past' : '') + '">' +
+          '<div class="event-date">' + dateLabel + '</div>' +
+          '<div class="event-body">' +
+            '<div class="event-purpose">' + escapeHtml(item.purpose || '') + '</div>' +
+            (item.location ? '<div class="event-location">📍 ' + escapeHtml(item.location) + '</div>' : '') +
+            (item.notes ? '<div class="event-notes">' + escapeHtml(item.notes) + '</div>' : '') +
+          '</div>' +
+        '</div>'
+      );
+    }
+
+    function escapeHtml(str) {
+      const d = document.createElement('div');
+      d.textContent = str;
+      return d.innerHTML;
+    }
+
+    loadEvents();
+  </script>
+</body>
+</html>
