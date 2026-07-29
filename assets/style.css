@@ -59,7 +59,7 @@ nav.tabs a {
 nav.tabs a:hover { background: var(--n-30); }
 nav.tabs a.active { background: var(--p-10); color: var(--p-100); }
 
-h1.page-title { font-family: Georgia, serif; font-size: 28px; margin: 0 0 4px; color: var(--p-100); }
+h1.page-title { font-family: Inter, serif; font-size: 28px; margin: 0 0 4px; color: var(--p-100); }
 p.page-sub { color: var(--n-100); font-size: 14px; margin: 0 0 32px; }
 
 .state { padding: 16px; border-radius: var(--radius); background: var(--n-30); color: var(--n-100); font-size: 14px; }
