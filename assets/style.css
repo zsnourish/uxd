@@ -20,7 +20,7 @@
   --olive-6: #717f2d; --olive-1: #e8ecd7; --olive-05: #f4f5eb;
   --jade-6: #627e76; --jade-1: #e5ebea; --jade-05: #f2f5f4;
 
-  --red-6: #b3423a; --red-1: #f6dedc;
+  --red-6: #797979; --red-1: #e7e7e7;
 
   --radius: 8px;
   --radius-sm: 5px;
@@ -44,7 +44,7 @@ header.site {
   background: var(--n-10);
 }
 header.site .wrap { padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; }
-.brand { font-family: Georgia, serif; font-weight: 700; font-size: 20px; color: var(--p-100); }
+.brand { font-family: Inter, serif; font-weight: 700; font-size: 20px; color: var(--p-100); }
 .brand span { color: var(--n-100); font-family: 'Inter', sans-serif; font-weight: 500; font-size: 14px; margin-left: 8px; }
 
 nav.tabs { display: flex; gap: 4px; }
