@@ -19,12 +19,14 @@
 
   <main class="wrap">
     <h1 class="page-title">Team Updates</h1>
-    <p class="page-sub">Announcements, hiring news and decisions.</p>
+    <p class="page-sub">Announcements, hiring news and decisions — synced from Notion.</p>
 
     <div id="content">
       <div class="state">Loading updates…</div>
     </div>
   </main>
+
+  <footer class="site">Synced from the Team Announcements database in Notion.</footer>
 
   <script>
     async function loadUpdates() {
@@ -37,10 +39,75 @@
           el.innerHTML = '<div class="state">No updates yet.</div>';
           return;
         }
-        el.innerHTML = data.map(renderCard).join('');
+        el.innerHTML = renderQuarters(data);
+        wireTabs();
       } catch (err) {
         el.innerHTML = '<div class="state error">Couldn\'t load updates right now (' + err.message + '). Check that the Netlify function is deployed and NOTION_TOKEN is set.</div>';
       }
+    }
+
+    function quarterKey(dateStr) {
+      const d = new Date(dateStr);
+      const q = Math.floor(d.getMonth() / 3) + 1;
+      return d.getFullYear() + '-Q' + q;
+    }
+
+    function quarterLabel(key) {
+      const [year, q] = key.split('-Q');
+      const ranges = { 1: 'Jan–Mar', 2: 'Apr–Jun', 3: 'Jul–Sep', 4: 'Oct–Dec' };
+      return ranges[q] + ' ' + year.slice(2);
+    }
+
+    function renderQuarters(data) {
+      const withDates = data.filter(item => item.date);
+      const undated = data.filter(item => !item.date);
+
+      const groups = {};
+      withDates.forEach(item => {
+        const key = quarterKey(item.date);
+        (groups[key] = groups[key] || []).push(item);
+      });
+
+      // Newest quarter first
+      const quarterKeys = Object.keys(groups).sort().reverse();
+
+      const today = new Date();
+      const currentKey = quarterKey(today.toISOString());
+      let defaultKey = quarterKeys.includes(currentKey) ? currentKey : quarterKeys[0];
+
+      let tabsHtml = '<div class="quarter-tabs">';
+      let panelsHtml = '';
+
+      quarterKeys.forEach(key => {
+        const isActive = key === defaultKey;
+        tabsHtml += '<button class="quarter-tab' + (isActive ? ' active' : '') + '" data-quarter="' + key + '">' + quarterLabel(key) + '</button>';
+        panelsHtml += '<div class="quarter-panel' + (isActive ? ' active' : '') + '" data-quarter-panel="' + key + '">' +
+          groups[key].map(renderCard).join('') +
+        '</div>';
+      });
+
+      if (undated.length) {
+        const isActive = quarterKeys.length === 0;
+        tabsHtml += '<button class="quarter-tab' + (isActive ? ' active' : '') + '" data-quarter="undated">Undated</button>';
+        panelsHtml += '<div class="quarter-panel' + (isActive ? ' active' : '') + '" data-quarter-panel="undated">' +
+          undated.map(renderCard).join('') +
+        '</div>';
+      }
+
+      tabsHtml += '</div>';
+      return tabsHtml + panelsHtml;
+    }
+
+    function wireTabs() {
+      document.querySelectorAll('.quarter-tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const key = btn.getAttribute('data-quarter');
+          document.querySelectorAll('.quarter-tab').forEach(b => b.classList.toggle('active', b === btn));
+          document.querySelectorAll('.quarter-panel').forEach(p =>
+            p.classList.toggle('active', p.getAttribute('data-quarter-panel') === key)
+          );
+        });
+      });
     }
 
     function renderCard(item) {

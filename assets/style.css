@@ -128,3 +128,60 @@ p.page-sub { color: var(--n-100); font-size: 14px; margin: 0 0 32px; }
 .legend-swatch.external { background: var(--olive-6); }
 
 footer.site { text-align: center; font-size: 12px; color: var(--n-70); padding: 32px 0; }
+
+/* Past events accordion */
+.past-accordion {
+  margin-top: 28px;
+  border-top: 1px solid var(--n-40);
+  padding-top: 16px;
+}
+.past-accordion summary {
+  cursor: pointer;
+  list-style: none;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--n-100);
+  padding: 6px 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.past-accordion summary::-webkit-details-marker { display: none; }
+.past-accordion summary::before {
+  content: '▸';
+  font-size: 11px;
+  transition: transform 0.15s;
+}
+.past-accordion[open] summary::before { transform: rotate(90deg); }
+.past-accordion .event-row { opacity: 0.55; }
+.past-accordion .event-row .event-purpose { text-decoration: line-through; }
+.past-accordion .accordion-body { margin-top: 12px; }
+
+/* Quarter tabs (announcements) */
+.quarter-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--n-40);
+  padding-bottom: 0;
+}
+.quarter-tab {
+  appearance: none;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--n-100);
+  padding: 8px 14px 12px;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+.quarter-tab:hover { color: var(--n-120); }
+.quarter-tab.active { color: var(--p-100); border-bottom-color: var(--p-100); }
+.quarter-panel { display: none; }
+.quarter-panel.active { display: block; }

@@ -19,7 +19,7 @@
 
   <main class="wrap">
     <h1 class="page-title">Team Events</h1>
-    <p class="page-sub">Team days, kickoffs and events.</p>
+    <p class="page-sub">Team days, kickoffs and events — synced from Notion.</p>
 
     <div class="legend">
       <div class="legend-item"><span class="legend-swatch team"></span>Other UX/Design team events</div>
@@ -31,6 +31,8 @@
       <div class="state">Loading events…</div>
     </div>
   </main>
+
+  <footer class="site">Synced from the Team Events database in Notion.</footer>
 
   <script>
     const CATEGORY_CLASS = {
@@ -49,14 +51,30 @@
           return;
         }
         data.sort((a, b) => new Date(a.dateStart) - new Date(b.dateStart));
-        el.innerHTML = renderGrouped(data);
+
+        const today = new Date(); today.setHours(0,0,0,0);
+        const upcoming = data.filter(item => new Date(item.dateStart) >= today);
+        const past = data.filter(item => new Date(item.dateStart) < today).reverse(); // most recent past first
+
+        let html = upcoming.length
+          ? renderGrouped(upcoming)
+          : '<div class="state">No upcoming events.</div>';
+
+        if (past.length) {
+          html +=
+            '<details class="past-accordion">' +
+              '<summary>Past events (' + past.length + ')</summary>' +
+              '<div class="accordion-body">' + renderGrouped(past) + '</div>' +
+            '</details>';
+        }
+
+        el.innerHTML = html;
       } catch (err) {
         el.innerHTML = '<div class="state error">Couldn\'t load events right now (' + err.message + '). Check that the Netlify function is deployed and NOTION_TOKEN is set.</div>';
       }
     }
 
     function renderGrouped(events) {
-      const today = new Date(); today.setHours(0,0,0,0);
       let html = '';
       let currentMonth = '';
       events.forEach(item => {
@@ -66,19 +84,18 @@
           html += '<div class="month-heading">' + monthLabel + '</div>';
           currentMonth = monthLabel;
         }
-        html += renderRow(item, d, today);
+        html += renderRow(item, d);
       });
       return html;
     }
 
-    function renderRow(item, d, today) {
-      const isPast = d < today;
+    function renderRow(item, d) {
       const catClass = CATEGORY_CLASS[item.category] || '';
       const dateLabel = item.dateEnd && item.dateEnd !== item.dateStart
         ? d.getDate() + '–' + new Date(item.dateEnd).getDate() + ' ' + d.toLocaleDateString('en-GB', { month: 'short' })
         : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
       return (
-        '<div class="event-row ' + catClass + (isPast ? ' past' : '') + '">' +
+        '<div class="event-row ' + catClass + '">' +
           '<div class="event-date">' + dateLabel + '</div>' +
           '<div class="event-body">' +
             '<div class="event-purpose">' + escapeHtml(item.purpose || '') + '</div>' +
