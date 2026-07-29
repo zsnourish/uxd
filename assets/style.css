@@ -44,7 +44,7 @@ header.site {
   background: var(--n-10);
 }
 header.site .wrap { padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; }
-.brand { font-family: Inter, serif; font-weight: 700; font-size: 20px; color: var(--p-100); }
+.brand { font-family: 'Inter', serif; font-weight: 700; font-size: 20px; color: var(--p-100); }
 .brand span { color: var(--n-100); font-family: 'Inter', sans-serif; font-weight: 500; font-size: 14px; margin-left: 8px; }
 
 nav.tabs { display: flex; gap: 4px; }
@@ -59,7 +59,7 @@ nav.tabs a {
 nav.tabs a:hover { background: var(--n-30); }
 nav.tabs a.active { background: var(--p-10); color: var(--p-100); }
 
-h1.page-title { font-family: Inter, serif; font-size: 28px; margin: 0 0 4px; color: var(--p-100); }
+h1.page-title { font-family: 'Inter', serif; font-size: 28px; margin: 0 0 4px; color: var(--p-100); }
 p.page-sub { color: var(--n-100); font-size: 14px; margin: 0 0 32px; }
 
 .state { padding: 16px; border-radius: var(--radius); background: var(--n-30); color: var(--n-100); font-size: 14px; }
@@ -136,7 +136,7 @@ footer.site { text-align: center; font-size: 12px; color: var(--n-70); padding: 
   padding-top: 16px;
 }
 .past-accordion summary {
-  cursor: pointer;
+  cursor: po'Inter';
   list-style: none;
   font-size: 13px;
   font-weight: 700;
@@ -172,7 +172,7 @@ footer.site { text-align: center; font-size: 12px; color: var(--n-70); padding: 
   appearance: none;
   border: none;
   background: none;
-  cursor: pointer;
+  cursor: po'Inter';
   font-family: inherit;
   font-size: 14px;
   font-weight: 600;
