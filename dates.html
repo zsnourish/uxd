@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Team Dates — Nourish UX/Design</title>
   <link rel="stylesheet" href="/assets/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
 </head>
 <body>
   <header class="site">
@@ -19,7 +21,7 @@
 
   <main class="wrap">
     <h1 class="page-title">Team Events</h1>
-    <p class="page-sub">Team days, kickoffs and events.</p>
+    <p class="page-sub">Team days, kickoffs and events — synced from Notion.</p>
 
     <div class="legend">
       <div class="legend-item"><span class="legend-swatch team"></span>Other UX/Design team events</div>
@@ -31,6 +33,8 @@
       <div class="state">Loading events…</div>
     </div>
   </main>
+
+  <footer class="site">Synced from the Team Events database in Notion.</footer>
 
   <script>
     const CATEGORY_CLASS = {
@@ -97,7 +101,7 @@
           '<div class="event-date">' + dateLabel + '</div>' +
           '<div class="event-body">' +
             '<div class="event-purpose">' + escapeHtml(item.purpose || '') + '</div>' +
-            (item.location ? '<div class="event-location">📍 ' + escapeHtml(item.location) + '</div>' : '') +
+            (item.location ? '<div class="event-location"><i class="fa-solid fa-location-dot"></i> ' + escapeHtml(item.location) + '</div>' : '') +
             (item.notes ? '<div class="event-notes">' + escapeHtml(item.notes) + '</div>' : '') +
           '</div>' +
         '</div>'
