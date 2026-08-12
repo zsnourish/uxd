@@ -119,7 +119,7 @@ p.page-sub { color: var(--n-100); font-size: 14px; margin: 0 0 32px; }
 .event-purpose { font-size: 15px; font-weight: 600; color: var(--n-120); }
 .event-location { font-size: 12px; color: var(--n-100); margin: 5px 0; }
 .event-location i { color: #bababa; margin-right: 3px; width: 12px; text-align: center; font-size: 11px; }
-.event-notes { font-size: 13px; color: var(--n-100); margin-top: 4px; font-style: italic; }
+.event-notes { font-size: 12px; color: #909195; margin-top: 4px; font-style: italic; }
 
 .legend { display: flex; gap: 18px; margin-bottom: 24px; flex-wrap: wrap; }
 .legend-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--n-100); }
