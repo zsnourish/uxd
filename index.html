@@ -4,23 +4,32 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Team Noticeboard — Nourish UX/Design</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" />
   <link rel="stylesheet" href="/assets/style.css" />
 </head>
 <body>
   <header class="site">
     <div class="wrap">
-      <div class="brand">Team Noticeboard <span>Nourish UX/Design</span></div>
+      <a class="brand" href="/"><span class="brand-mark" aria-hidden="true">N</span>Team Noticeboard</a>
       <nav class="tabs">
         <a href="/" class="active">Updates</a>
-        <a href="/dates.html">Team Dates</a>
-        <a href="https://bookings.cloud.microsoft/book/UXSiteVisits@nourishcare.com/" target="_blank" rel="noopener">Site Visits ↗</a>
+        <a href="/dates.html">Team dates</a>
+        <a href="https://bookings.cloud.microsoft/book/UXSiteVisits@nourishcare.com/" target="_blank" rel="noopener">Site visits ↗</a>
       </nav>
     </div>
   </header>
 
+  <section class="hero">
+    <div class="wrap">
+      <p class="eyebrow">Nourish UX and Design</p>
+      <h1 class="page-title">Team updates</h1>
+      <p class="page-sub">Announcements, hiring news and decisions, synced from Notion.</p>
+    </div>
+  </section>
+
   <main class="wrap">
-    <h1 class="page-title">Team Updates</h1>
-    <p class="page-sub">Announcements, hiring news and decisions — synced from Notion.</p>
 
     <div id="content">
       <div class="state">Loading updates…</div>
