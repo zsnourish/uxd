@@ -59,13 +59,12 @@ header.site {
   border-bottom: 1px solid var(--line);
 }
 header.site .wrap { padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-.brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 16px; color: var(--ink); text-decoration: none; letter-spacing: -0.01em; }
-.brand-mark {
-  width: 28px; height: 28px; border-radius: 8px;
-  background: var(--sage-deep); color: #fff;
-  display: inline-flex; align-items: center; justify-content: center;
-  font-size: 15px; font-weight: 800;
-}
+.brand { display: flex; align-items: center; gap: 14px; text-decoration: none; color: var(--ink); }
+.brand-logo { height: 34px; width: auto; display: block; }
+.brand-divider { width: 1px; height: 30px; background: var(--line); }
+.brand-text { display: flex; flex-direction: column; line-height: 1.15; }
+.brand-text strong { font-size: 15px; font-weight: 800; letter-spacing: -0.01em; color: var(--ink); }
+.brand-text span { font-size: 12px; font-weight: 600; color: var(--sage); }
 
 nav.tabs { display: flex; gap: 2px; }
 nav.tabs a {
@@ -78,7 +77,12 @@ nav.tabs a:hover { color: var(--ink); background: var(--tint); }
 nav.tabs a.active { color: var(--sage-deep); background: var(--tint-2); }
 
 /* Hero */
-.hero { background: var(--tint); border-bottom: 1px solid var(--line); }
+.hero { background: var(--tint); border-bottom: 1px solid var(--line); position: relative; overflow: hidden; }
+.hero::after {
+  content: ''; position: absolute; right: -40px; top: -30px; width: 220px; height: 220px;
+  background: url('/assets/nourish-mark.png') no-repeat center / contain; opacity: 0.08; pointer-events: none;
+}
+.hero .wrap { position: relative; z-index: 1; }
 .hero .wrap { padding: 36px 24px 28px; }
 .eyebrow { margin: 0 0 4px; font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--sage); }
 h1.page-title { font-size: 32px; line-height: 1.2; font-weight: 800; letter-spacing: -0.02em; margin: 0 0 6px; color: var(--ink); }
@@ -151,7 +155,8 @@ p.page-sub { color: var(--muted); font-size: 15px; margin: 0; }
 .legend-swatch.org { background: var(--cat-org); }
 .legend-swatch.external { background: var(--cat-ext); }
 
-footer.site { text-align: center; font-size: 13px; color: var(--faint); padding: 28px 24px 40px; border-top: 1px solid var(--line-soft); }
+footer.site { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--faint); padding: 28px 24px 40px; border-top: 1px solid var(--line-soft); }
+.footer-mark { width: 18px; height: 18px; }
 
 /* Past events accordion */
 .past-accordion { margin-top: 32px; border-top: 1px solid var(--line); padding-top: 16px; }
@@ -192,5 +197,8 @@ footer.site { text-align: center; font-size: 13px; color: var(--faint); padding:
   header.site .wrap { flex-wrap: wrap; gap: 8px; padding: 12px 16px; }
   .wrap, .hero .wrap { padding-left: 16px; padding-right: 16px; }
   h1.page-title { font-size: 26px; }
+  .brand-logo { height: 24px; }
+  .brand-divider { height: 24px; }
+  .hero::after { width: 140px; height: 140px; right: -30px; top: -20px; }
   nav.tabs a { padding: 6px 10px; }
 }
