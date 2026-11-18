@@ -186,3 +186,29 @@ footer.site { text-align: center; font-size: 12px; color: var(--n-70); padding: 
 .quarter-tab.active { color: var(--p-100); border-bottom-color: var(--p-100); }
 .quarter-panel { display: none; }
 .quarter-panel.active { display: block; }
+
+/* Care site visits */
+.title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 8px; }
+.title-row .page-sub { margin-bottom: 24px; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--p-100); color: var(--n-10);
+  font-size: 14px; font-weight: 600; text-decoration: none;
+  padding: 10px 16px; border-radius: var(--radius-sm); white-space: nowrap;
+}
+.btn:hover { background: var(--p-90); }
+.event-row.category-visit { border-left-color: var(--jade-6); }
+a.visit-link { text-decoration: none; color: inherit; }
+a.visit-link:hover { border-color: var(--n-70); border-left-color: var(--jade-6); }
+.visit-going { font-style: normal; color: var(--n-100); }
+.visit-going i { margin-right: 4px; font-size: 11px; }
+.visit-open { font-size: 13px; font-weight: 600; color: var(--p-100); white-space: nowrap; align-self: center; }
+.visit-open i { font-size: 11px; margin-left: 4px; }
+@media (max-width: 560px) {
+  .event-row { flex-wrap: wrap; }
+  .visit-open { width: 100%; }
+}
+.category-visit .event-date { min-width: 128px; }
+@media (max-width: 560px) {
+  header.site .wrap { flex-wrap: wrap; gap: 8px; padding: 16px; }
+}
