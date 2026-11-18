@@ -62,29 +62,3 @@ git add .
 git commit -m "Add Team Noticeboard site (Notion-backed)"
 git push
 ```
-
-## Site Visits (`/visits.html`)
-
-Upcoming UX care site visits from the **UX Site Visits** Microsoft Bookings calendar
-(https://bookings.cloud.microsoft/book/UXSiteVisits@nourishcare.com/), read live through
-Microsoft Graph by `netlify/functions/visits.js`.
-
-The noticeboard is public, so the function only sends date, time, town and how many people
-are going. Care site names, addresses, service names, notes and attendee names stay in
-Bookings; each visit links to its Bookings page for the full details. Visits nobody has booked
-yet show under "Open to book".
-
-### Connect it (one-off, needs an Entra admin)
-1. Entra admin centre → App registrations → New registration: "UX Noticeboard – Bookings",
-   single tenant, no redirect URI.
-2. API permissions → Add → Microsoft Graph → **Application** permissions →
-   `Bookings.Read.All` → Grant admin consent for Nourish.
-3. Certificates & secrets → New client secret (24 months). Copy the **Value**.
-4. In Netlify (uxnourish → Site configuration → Environment variables), add as secrets:
-   - `MS_TENANT_ID` = `6e6c2cfb-a9eb-4a32-8e7a-7600eb1fc7a3`
-   - `MS_CLIENT_ID` = the app's Application (client) ID
-   - `MS_CLIENT_SECRET` = the secret value
-5. Trigger a redeploy. Until then the page shows a "not set up yet" note and the booking link.
-
-Town comes from the address **City** field on each Bookings service, so fill that in when you
-add a visit. Responses are cached for 10 minutes.
