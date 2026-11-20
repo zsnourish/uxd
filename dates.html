@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" />
   <link rel="stylesheet" href="/assets/style.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css" />
 
 </head>
 <body>
@@ -51,7 +51,13 @@
 
   <footer class="site"><img src="/assets/nourish-mark.png" alt="" class="footer-mark" />Nourish UX and Design team</footer>
 
+  <script src="/assets/rich.js"></script>
   <script>
+    const CATEGORY_ICON = {
+      'Nourish org events': 'buildings',
+      'Non-Nourish events': 'ticket'
+    };
+
     const CATEGORY_CLASS = {
       'Nourish org events': 'category-org',
       'Non-Nourish events': 'category-external'
@@ -115,12 +121,23 @@
         '<div class="event-row ' + catClass + '">' +
           '<div class="event-date">' + dateLabel + '</div>' +
           '<div class="event-body">' +
-            '<div class="event-purpose">' + escapeHtml(item.purpose || '') + '</div>' +
-            (item.location ? '<div class="event-location"><i class="fa-solid fa-location-dot"></i> ' + escapeHtml(item.location) + '</div>' : '') +
-            (item.notes ? '<div class="event-notes">' + escapeHtml(item.notes) + '</div>' : '') +
+            '<div class="event-purpose">' + icon(item.icon || CATEGORY_ICON[item.category] || 'users-three', 'event-icon') + '<span>' + escapeHtml(item.purpose || '') + '</span></div>' +
+            renderLocation(item.location) +
+            (item.notes && item.notes.length ? '<div class="event-notes">' + renderRich(item.notes) + '</div>' : '') +
           '</div>' +
         '</div>'
       );
+    }
+
+    function renderLocation(loc) {
+      if (!loc) return '';
+      if (typeof loc === 'string') loc = { name: loc };
+      if (!loc.name) return '';
+      const name = loc.mapUrl
+        ? '<a href="' + escapeHtml(loc.mapUrl) + '" target="_blank" rel="noopener">' + escapeHtml(loc.name) + '</a>'
+        : escapeHtml(loc.name);
+      return '<div class="event-location">' + icon('map-pin') + '<span>' + name +
+        (loc.detail ? '<span class="event-address">' + escapeHtml(loc.detail) + '</span>' : '') + '</span></div>';
     }
 
     function escapeHtml(str) {

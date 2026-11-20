@@ -6,6 +6,7 @@
 //   NOTION_ANNOUNCEMENTS_DB_ID   — the database ID (from its URL)
 
 const NOTION_VERSION = '2022-06-28';
+const { richSegments } = require('../lib/notion');
 
 exports.handler = async function () {
   const token = process.env.NOTION_TOKEN;
@@ -48,8 +49,10 @@ exports.handler = async function () {
 
     const items = results.map((page) => {
       const props = page.properties;
+      const update = richSegments(props['Update']?.title);
       return {
-        update: richTextToPlain(props['Update']?.title),
+        update: update.segments,
+        icon: update.icon,
         subject: props['Subject']?.select?.name || '',
         date: props['Date']?.date?.start || null,
         actionNeeded: props['Action Needed']?.select?.name || 'No',

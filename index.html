@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" />
   <link rel="stylesheet" href="/assets/style.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css" />
 </head>
 <body>
   <header class="site">
@@ -43,6 +44,7 @@
 
   <footer class="site"><img src="/assets/nourish-mark.png" alt="" class="footer-mark" />Nourish UX and Design team</footer>
 
+  <script src="/assets/rich.js"></script>
   <script>
     async function loadUpdates() {
       const el = document.getElementById('content');
@@ -125,6 +127,15 @@
       });
     }
 
+    const SUBJECT_ICON = {
+      'Team': 'users-three',
+      'Team Day': 'users-three',
+      'Hiring': 'user-plus',
+      'Team Day / Travel': 'airplane-tilt',
+      'Team Day / Hatch': 'microphone-stage',
+      'Design Roles': 'briefcase'
+    };
+
     function renderCard(item) {
       const dateStr = item.date
         ? new Date(item.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
@@ -139,7 +150,7 @@
             '<span class="update-date">' + dateStr + '</span>' +
             actionPill +
           '</div>' +
-          '<div class="update-body">' + escapeHtml(item.update || '') + '</div>' +
+          '<div class="update-body">' + icon(item.icon || SUBJECT_ICON[item.subject] || 'megaphone-simple', 'update-icon') + '<div>' + renderRich(item.update) + '</div></div>' +
         '</div>'
       );
     }

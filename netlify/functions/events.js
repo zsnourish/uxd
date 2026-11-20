@@ -6,6 +6,7 @@
 //   NOTION_EVENTS_DB_ID     — the database ID (from its URL)
 
 const NOTION_VERSION = '2022-06-28';
+const { richSegments, locationOf } = require('../lib/notion');
 
 exports.handler = async function () {
   const token = process.env.NOTION_TOKEN;
@@ -48,14 +49,14 @@ exports.handler = async function () {
 
     const items = results.map((page) => {
       const props = page.properties;
+      const title = richSegments(props['Purpose']?.title);
       return {
-        purpose: richTextToPlain(props['Purpose']?.title),
+        purpose: title.segments.map((t) => t.text).join(''),
+        icon: title.icon,
         dateStart: props['Dates']?.date?.start || null,
         dateEnd: props['Dates']?.date?.end || null,
-        location: props['Location']?.rich_text
-          ? richTextToPlain(props['Location'].rich_text)
-          : '',
-        notes: props['Notes']?.rich_text ? richTextToPlain(props['Notes'].rich_text) : '',
+        location: locationOf(props['Location']),
+        notes: richSegments(props['Notes']?.rich_text).segments,
         category: props['Category']?.select?.name || '',
       };
     });
