@@ -9,7 +9,7 @@
   --ink: #14261d;
   --text: #33423a;
   --muted: #5f6f66;
-  --faint: #8a9890;
+  --faint: #66756c;
   --line: #e2ebe5;
   --line-soft: #eef3f0;
   --canvas: #ffffff;
@@ -144,9 +144,9 @@ p.page-sub { color: var(--muted); font-size: 15px; margin: 0; }
 }
 .event-body { flex: 1; min-width: 0; }
 .event-purpose { font-size: 15px; font-weight: 700; color: var(--ink); }
-.event-location { font-size: 13px; color: var(--muted); margin: 3px 0 0; }
+.event-location { font-size: 14px; color: var(--muted); margin: 3px 0 0; }
 .event-location i { color: var(--faint); margin-right: 4px; font-size: 12px; }
-.event-notes { font-size: 13px; color: var(--faint); margin-top: 4px; }
+.event-notes { font-size: 14px; line-height: 1.5; color: var(--muted); margin-top: 6px; }
 
 .legend { display: flex; gap: 18px; margin-bottom: 28px; flex-wrap: wrap; }
 .legend-item { display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--muted); font-weight: 500; }
