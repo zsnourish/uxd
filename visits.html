@@ -93,6 +93,7 @@
     .toast a { color: inherit; }
     .toast .icon-btn { width: 24px; height: 24px; margin: -2px -4px 0 auto; color: inherit; }
     .toast.fade { opacity: 0; }
+    .list-link { margin: 0; font-size: 14px; font-weight: 600; }
     .auto-note { font-size: 13px; font-weight: 600; color: var(--sage-deep); }
     .label-row .label-extras { display: flex; align-items: center; gap: 10px; }
     .sheet-search { margin-bottom: 8px; }
@@ -734,6 +735,7 @@
         title: editing ? s.code : 'New code',
         caption: editing ? 'Change its type, or remove it. Codes are never renumbered.' : 'Add the customer to the ' + listLink() + ' with this code too.',
         body: '<div class="form-grid">' + field('codetype', 'Type', '', typeSelect) +
+          (editing && state.customerListUrl ? '<p class="list-link"><a href="' + esc(whoUrl(s.code)) + '" target="_blank" rel="noopener">Update details in the list ↗</a></p>' : '') +
           (editing ? '' : field('newcode', 'Code', 'The next free code for this type. Change it only if the ' + listLink() + ' already uses another.',
             '<CTRL<input id="f-newcode" name="code" maxlength="20" autocomplete="off" data-suggested="' + esc(suggested) + '" value="' + esc(codeValue) + '">')) +
           '</div>' + (state.formError ? '<p class="form-error" role="alert">' + esc(state.formError) + '</p>' : ''),
@@ -1138,6 +1140,7 @@
       s.newCodeDraft = code
       if (!/^[A-Z]{1,6}-\d{1,6}$/.test(code)) { state.fieldErrors = { newcode: 'Enter a code like CH-014: letters, a hyphen, then numbers.' }; state.focusField = 'newcode'; render(); return focusPending() }
       act({ action: 'add-code', code, type }, formEl.querySelector('[type=submit]'), (data) => {
+        toast(esc(data.code) + ' added.' + (state.customerListUrl ? ' <a href="' + esc(state.customerListUrl) + '" target="_blank" rel="noopener">Update details in the list ↗</a>' : ''))
         // Added while booking a visit: go straight back to the visit with the new code filled in.
         if (s.from === 'visit') {
           state.draft = { ...(state.draft || {}), code: data.code, kind: type }
