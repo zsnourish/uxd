@@ -208,7 +208,7 @@ footer.site { display: flex; align-items: center; justify-content: center; gap: 
 .event-icon { font-size: 18px; color: var(--cat); margin-top: 2px; flex: none; }
 .event-location { display: flex; align-items: flex-start; gap: 6px; }
 .event-location .ph { color: var(--faint); font-size: 15px; margin-top: 3px; flex: none; }
-.event-location a { color: var(--ink); font-weight: 600; text-decoration: none; }
+.event-location a { color: var(--sage-deep); font-weight: 600; text-decoration: none; }
 .event-location a:hover { text-decoration: underline; }
 .event-address { color: var(--muted); }
 .event-address::before { content: ' · '; }
@@ -216,3 +216,28 @@ footer.site { display: flex; align-items: center; justify-content: center; gap: 
 .event-notes a:hover, .update-body a:hover { text-decoration-color: currentColor; }
 .update-body { display: flex; align-items: flex-start; gap: 10px; }
 .update-icon { font-size: 20px; color: var(--sage); margin-top: 1px; flex: none; }
+
+/* Event row (option A): date block, title, one meta line, notes behind Details */
+.event-row { align-items: flex-start; gap: 14px; padding: 12px 16px 12px 12px; }
+.event-date {
+  width: 56px; min-width: 0; padding: 6px 0; border-radius: 10px;
+  display: flex; flex-direction: column; align-items: center; line-height: 1.1;
+}
+.event-day { font-size: 18px; font-weight: 800; letter-spacing: -0.01em; }
+.event-day.range { font-size: 14px; padding-top: 3px; }
+.event-month { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; margin-top: 2px; }
+.event-body { padding-top: 2px; }
+.event-purpose { display: block; font-size: 15px; font-weight: 700; color: var(--ink); }
+.event-meta { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.event-meta a { color: var(--sage-deep); font-weight: 600; text-decoration: none; }
+.event-meta a:hover { text-decoration: underline; }
+.event-details { margin-top: 4px; }
+.event-details summary {
+  list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;
+  font-size: 12px; font-weight: 700; color: var(--sage);
+}
+.event-details summary::-webkit-details-marker { display: none; }
+.event-details summary::after { content: '▾'; font-size: 10px; transition: transform 0.15s; }
+.event-details[open] summary::after { transform: rotate(180deg); }
+.event-details summary:hover { color: var(--sage-deep); }
+.event-details .event-notes { font-size: 13px; color: var(--muted); margin-top: 6px; line-height: 1.55; }

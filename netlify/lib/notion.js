@@ -54,8 +54,11 @@ function locationOf(prop) {
   if (!prop) return null;
   if (prop.type === 'place' && prop.place) {
     const { name = '', address = '', lat, lon } = prop.place;
-    let detail = address.replace(/,?\s*United Kingdom$/i, '');
-    if (name && detail.toLowerCase().startsWith(name.toLowerCase())) detail = detail.slice(name.length).replace(/^,\s*/, '');
+    // Town only: the last address part that isn't a postcode or the country.
+    const parts = address.split(',').map((x) => x.trim())
+      .filter((x) => x && !/^united kingdom$|^uk$/i.test(x) && !/^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/i.test(x));
+    let detail = parts.length > 1 ? parts[parts.length - 1] : '';
+    if (detail && name && detail.toLowerCase() === name.toLowerCase()) detail = '';
     const q = (address && name && address.toLowerCase().startsWith(name.toLowerCase()) ? address : [name, address].filter(Boolean).join(', ')) || (lat != null ? `${lat},${lon}` : '');
     return { name: name || detail, detail: name ? detail : '', mapUrl: q ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}` : null };
   }

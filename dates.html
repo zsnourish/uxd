@@ -53,11 +53,6 @@
 
   <script src="/assets/rich.js"></script>
   <script>
-    const CATEGORY_ICON = {
-      'Nourish org events': 'buildings',
-      'Non-Nourish events': 'ticket'
-    };
-
     const CATEGORY_CLASS = {
       'Nourish org events': 'category-org',
       'Non-Nourish events': 'category-external'
@@ -114,30 +109,38 @@
 
     function renderRow(item, d) {
       const catClass = CATEGORY_CLASS[item.category] || '';
-      const dateLabel = item.dateEnd && item.dateEnd !== item.dateStart
-        ? d.getDate() + '–' + new Date(item.dateEnd).getDate() + ' ' + d.toLocaleDateString('en-GB', { month: 'short' })
-        : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+      const month = d.toLocaleDateString('en-GB', { month: 'short' });
+      const end = item.dateEnd && item.dateEnd !== item.dateStart ? new Date(item.dateEnd) : null;
+      const day = end ? d.getDate() + '–' + end.getDate() : String(d.getDate());
+      const dateLabel = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) +
+        (end ? ' to ' + end.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }) : '');
+      const meta = renderMeta(item.location);
+      const notes = item.notes && item.notes.length
+        ? '<details class="event-details"><summary>Details</summary><div class="event-notes">' + renderRich(item.notes) + '</div></details>'
+        : '';
       return (
         '<div class="event-row ' + catClass + '">' +
-          '<div class="event-date">' + dateLabel + '</div>' +
+          '<div class="event-date" aria-label="' + escapeHtml(dateLabel) + '">' +
+            '<span class="event-day' + (end ? ' range' : '') + '">' + day + '</span>' +
+            '<span class="event-month">' + month + '</span>' +
+          '</div>' +
           '<div class="event-body">' +
-            '<div class="event-purpose">' + icon(item.icon || CATEGORY_ICON[item.category] || 'users-three', 'event-icon') + '<span>' + escapeHtml(item.purpose || '') + '</span></div>' +
-            renderLocation(item.location) +
-            (item.notes && item.notes.length ? '<div class="event-notes">' + renderRich(item.notes) + '</div>' : '') +
+            '<div class="event-purpose">' + escapeHtml(item.purpose || '') + '</div>' +
+            meta + notes +
           '</div>' +
         '</div>'
       );
     }
 
-    function renderLocation(loc) {
+    // One quiet line: venue (linked to the map) · town.
+    function renderMeta(loc) {
       if (!loc) return '';
       if (typeof loc === 'string') loc = { name: loc };
       if (!loc.name) return '';
       const name = loc.mapUrl
         ? '<a href="' + escapeHtml(loc.mapUrl) + '" target="_blank" rel="noopener">' + escapeHtml(loc.name) + '</a>'
         : escapeHtml(loc.name);
-      return '<div class="event-location">' + icon('map-pin') + '<span>' + name +
-        (loc.detail ? '<span class="event-address">' + escapeHtml(loc.detail) + '</span>' : '') + '</span></div>';
+      return '<div class="event-meta">' + name + (loc.detail ? ' · ' + escapeHtml(loc.detail) : '') + '</div>';
     }
 
     function escapeHtml(str) {
