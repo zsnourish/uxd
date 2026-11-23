@@ -57,6 +57,9 @@
     .combo-list li small { display: block; font-size: 13px; color: var(--muted); }
     .combo-list li[aria-selected="true"], .combo-list li:hover { background: var(--tint-2); }
     .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+    .view-switch { display: inline-flex; padding: 3px; gap: 2px; border-radius: 9px; background: var(--tint); box-shadow: var(--ring); margin-left: 6px; }
+    .view-switch button { appearance: none; border: 0; background: none; font: inherit; font-size: 13px; font-weight: 600; color: var(--muted); padding: 5px 10px; border-radius: 7px; cursor: pointer; }
+    .view-switch button[aria-pressed="true"] { background: var(--canvas); color: var(--sage-deep); box-shadow: 0 0 0 1px var(--tint-3); }
     .auto-note { font-size: 13px; font-weight: 600; color: var(--sage-deep); }
     .label-row .label-extras { display: flex; align-items: center; gap: 10px; }
     .sheet-search { margin-bottom: 8px; }
@@ -183,7 +186,7 @@
   (() => {
     const SITE = location.origin
     const ME_KEY = 'uxd-visits-me'
-        const state = { team: [], visits: [], maxPeople: 2, viewer: null, local: false, open: new Set(), me: null, sheet: null, sheetOpener: null, confirming: null, flash: {}, formError: '', fieldErrors: {}, types: ['Care home', 'Home care agency', 'Supported living', 'Mixed provider', 'Other'], codes: [], customerListUrl: '', focusField: null }
+        const state = { team: [], visits: [], maxPeople: 2, viewer: null, local: false, open: new Set(), me: null, sheet: null, sheetOpener: null, confirming: null, flash: {}, formError: '', teamView: false, fieldErrors: {}, types: ['Care home', 'Home care agency', 'Supported living', 'Mixed provider', 'Other'], codes: [], customerListUrl: '', focusField: null }
     const app = document.getElementById('app')
 
     // ── Local previews only: who to act as (live, it comes from the GitHub sign-in) ──
@@ -199,7 +202,13 @@
     const fmtStamp = (iso) => new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Europe/London' })
     const today = () => new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/London' })
     const people = (v) => [v.organiser, ...v.attendees]
-    const canManage = () => Boolean(state.me && (state.me.organiser || state.me.admin))
+    // Organisers and admins can switch to the team view, which hides the organiser tools.
+    const TEAMVIEW_KEY = 'uxd-visits-teamview'
+    const readTeamView = () => { try { return localStorage.getItem(TEAMVIEW_KEY) === '1' } catch { return false } }
+    const writeTeamView = (on) => { try { on ? localStorage.setItem(TEAMVIEW_KEY, '1') : localStorage.removeItem(TEAMVIEW_KEY) } catch {} }
+    const isOrganiserish = () => Boolean(state.me && (state.me.organiser || state.me.admin))
+    const canManage = () => isOrganiserish() && !state.teamView
+    state.teamView = readTeamView()
     const isMine = (v) => state.me && people(v).includes(state.me.id)
     const changedForMe = (v) => state.me && v.attendees.includes(state.me.id) && (v.seen?.[state.me.id] ?? -1) < v.sequence
     const placesLeft = (v) => Math.max(0, state.maxPeople - people(v).length)
@@ -374,7 +383,12 @@
       } else if (!state.me) {
         note = '<div class="notice" style="margin:0 0 20px">You can see visits with the team password. To opt in, <a href="/auth/signout?next=/visits">sign out</a> and sign in with GitHub.</div>'
       }
-      return '<div class="toolbar"><div class="whoami">' + who + '</div>' +
+      const viewSwitch = isOrganiserish()
+        ? '<div class="view-switch" role="group" aria-label="View">' +
+          '<button type="button" data-do="set-view" data-view="organiser" aria-pressed="' + !state.teamView + '">Organiser view</button>' +
+          '<button type="button" data-do="set-view" data-view="team" aria-pressed="' + state.teamView + '">Team view</button></div>'
+        : ''
+      return '<div class="toolbar"><div class="whoami">' + who + viewSwitch + '</div>' +
         (canManage() ? '<div class="actions" style="margin:0"><button class="icon-btn settings-btn" data-do="open-settings" aria-label="Site visit settings" title="Settings">' + ICON_COG + '</button><button class="btn primary" data-do="add">Add a visit</button></div>' : '') + '</div>' + note
     }
 
@@ -950,6 +964,9 @@
             state.sheet = { ...state.sheet, view: 'codes', code: undefined, confirmRemove: false }
           })
         }
+        case 'set-view':
+          state.teamView = el.dataset.view === 'team'; writeTeamView(state.teamView); state.confirming = null
+          render(); return document.querySelector('[data-do="set-view"][data-view="' + el.dataset.view + '"]')?.focus()
         case 'open-settings': return openSheet({ view: 'settings' }, '[data-do="open-settings"]')
         case 'open-type': return openSheet({ ...state.sheet, view: 'type', type: el.dataset.type, typeDraft: undefined, confirmRemove: false })
         case 'new-type': return openSheet({ ...state.sheet, view: 'type', type: null, typeDraft: undefined, confirmRemove: false })
