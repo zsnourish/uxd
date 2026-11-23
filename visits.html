@@ -80,8 +80,13 @@
       font-weight: 600; color: var(--ink); text-align: left; text-decoration: none; cursor: pointer; }
     .row-menu [role=menuitem]:hover, .row-menu [role=menuitem]:focus-visible { background: var(--tint); box-shadow: none; }
     .row-menu .danger-item { color: var(--bad); }
-    #status { position: sticky; top: 72px; z-index: 40; height: 0; }
-    .toast { position: absolute; left: 0; right: 0; margin: 0 auto; max-width: 560px; display: flex; gap: 10px; align-items: flex-start;
+    #status { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 60; width: min(560px, calc(100vw - 32px)); }
+    .check { display: flex; align-items: center; gap: 8px; margin: 10px 0 0; font-size: 14px; font-weight: 600; color: var(--ink); cursor: pointer; }
+    .check input { width: 18px; height: 18px; margin: 0; accent-color: var(--sage-deep); }
+    .sheet-check { margin: 20px 0 0; }
+    .confirm .confirm-q { margin: 0; font-weight: 700; color: var(--ink); }
+    .confirm .confirm-help { margin: 2px 0 0; font-size: 13px; color: var(--muted); }
+    .toast { position: relative; margin: 0 auto; max-width: 560px; display: flex; gap: 10px; align-items: flex-start;
       padding: 12px 14px; border-radius: var(--radius); background: var(--tint-2); color: var(--sage-deep); font-size: 14px; font-weight: 600;
       box-shadow: 0 0 0 1px var(--tint-3), 0 12px 28px -14px rgb(20 38 29 / 0.35); transition: opacity 0.4s ease; }
     .toast.bad { background: var(--bad-bg); color: var(--bad); box-shadow: 0 0 0 1px #f3c9c5, 0 12px 28px -14px rgb(20 38 29 / 0.35); }
@@ -281,6 +286,7 @@
     }
 
     async function act(body, button, after) {
+      let ok = false
       if (button) button.disabled = true
       try {
         const data = await api(body)
@@ -288,6 +294,7 @@
         if (data.types) state.types = data.types
         if (data.codes) state.codes = data.codes
         after && after(data)
+        ok = true
       } catch (err) {
         const formAction = ['create', 'update', 'add-type', 'rename-type', 'remove-type', 'add-code', 'update-code', 'remove-code'].includes(body.action)
         if (formAction && err.field) { state.fieldErrors = { [err.field]: err.message }; state.focusField = err.field }
@@ -298,6 +305,7 @@
       render()
       if (state.sheet && !state.focusField) focusSheet()
       focusPending()
+      return ok
     }
 
     async function refreshQuietly() {
@@ -364,15 +372,28 @@
       })
       return 'https://outlook.office.com/calendar/deeplink/compose?' + p.toString()
     }
-    function mailto(v, ids, kind) {
+    const others = (v) => people(v).filter((id) => !state.me || id !== state.me.id)
+    const namesOf = (ids) => { const n = ids.map(first); return n.length > 1 ? n.slice(0, -1).join(', ') + ' and ' + n[n.length - 1] : n[0] || '' }
+    const hasEmail = (ids) => ids.some((id) => member(id).email)
+    // A new message in Outlook on the web, written for a change or a cancellation.
+    function composeUrl(v, ids, kind, before) {
       const emails = ids.map((id) => member(id).email).filter(Boolean)
-      if (!emails.length) return ''
-      const subject = (kind === 'cancelled' ? 'Cancelled: ' : 'Changed: ') + 'site visit to ' + label(v) + ' on ' + fmtDate(v.date)
+      const when = (x) => fmtDate(x.date) + ', ' + x.start + ' to ' + x.end
+      const subject = (kind === 'cancelled' ? 'Cancelled: ' : 'Changed: ') + 'site visit to ' + label(v) + ' on ' + fmtDate((before || v).date)
       const body = kind === 'cancelled'
-        ? 'Hi,\n\nThe site visit to ' + label(v) + ' on ' + fmtDate(v.date) + ' is cancelled. You can take it out of your calendar from ' + SITE + '/visits.\n'
-        : 'Hi,\n\nThe site visit to ' + label(v) + ' has changed. It’s now on ' + fmtDate(v.date) + ', ' + v.start + ' to ' + v.end + ', in ' + v.town + '.\n\nUpdate your calendar from ' + SITE + '/visits.\n'
-      return 'mailto:' + emails.join(',') + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body)
+        ? 'Hi,\n\nThe site visit to ' + label(v) + ' on ' + when(v) + ' is cancelled. Please take it out of your calendar.\n\nDetails: ' + SITE + '/visits\n'
+        : 'Hi,\n\nThe site visit to ' + label(v) + ' has changed.' + (before && when(before) !== when(v) ? ' It was ' + when(before) + '.' : '') +
+          ' It’s now ' + when(v) + ', in ' + v.town + '.\n\nPlease update your calendar from ' + SITE + '/visits\n'
+      return 'https://outlook.office.com/mail/deeplink/compose?to=' + encodeURIComponent(emails.join(',')) + '&subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body)
     }
+    // Opened straight from the click so the browser allows it; pointed at Outlook once the save works.
+    function openComposeWindow() {
+      const w = window.open('', '_blank')
+      try { w.document.write('<p style="font:16px system-ui;padding:24px">Opening Outlook…</p>') } catch {}
+      return w
+    }
+
+
 
     // ── Rendering ──
     function render() {
@@ -471,12 +492,12 @@
       let menu = ''
       if (canEdit(v) && !cancelled && !past) {
         const menuOpen = state.menu === v.id
-        const email = v.attendees.length ? mailto(v, v.attendees, 'changed') : ''
+        const email = others(v).length && hasEmail(others(v)) ? composeUrl(v, others(v), 'changed') : ''
         menu = '<div class="menu-wrap"><button type="button" class="icon-btn kebab" data-do="menu" data-id="' + id + '" aria-haspopup="menu" aria-expanded="' + menuOpen + '" aria-controls="m-' + id + '" aria-label="Actions for ' + esc(v.code) + '">' + ICON_MORE + '</button>' +
           (menuOpen ? '<ul class="row-menu" role="menu" id="m-' + id + '" aria-label="Actions for ' + esc(v.code) + '">' +
             '<li role="none"><button type="button" role="menuitem" data-do="edit" data-id="' + id + '">Edit visit</button></li>' +
-            (email ? '<li role="none"><a role="menuitem" href="' + esc(email) + '">Email ' + esc(v.attendees.map(first).join(' and ')) + '</a></li>' : '') +
-            '<li role="none"><button type="button" role="menuitem" class="danger-item" data-do="ask-delete" data-id="' + id + '">Delete visit</button></li></ul>' : '') +
+            (email ? '<li role="none"><a role="menuitem" href="' + esc(email) + '" target="_blank" rel="noopener">Email ' + esc(namesOf(others(v))) + '</a></li>' : '') +
+            '<li role="none"><button type="button" role="menuitem" class="danger-item" data-do="ask-delete" data-id="' + id + '">Cancel visit</button></li></ul>' : '') +
           '</div>'
       }
 
@@ -543,9 +564,11 @@
         return '<div class="confirm">Withdraw from this visit? Your place goes back to the team.' +
           '<div class="actions"><button class="btn danger" data-do="withdraw" data-id="' + id + '">Withdraw</button><button class="btn link" data-do="cancel-confirm">Keep my place</button></div></div>'
       }
-      const who = v.attendees.map((a) => member(a).name).join(' and ')
-      return '<div class="confirm">Delete this visit?' + (who ? ' ' + esc(who) + ' opted in. They’ll see the cancellation here, and you can email them.' : ' Nobody else has opted in.') +
-        '<div class="actions"><button class="btn danger" data-do="delete" data-id="' + id + '">Delete visit</button><button class="btn link" data-do="cancel-confirm">Keep visit</button></div></div>'
+      const o = others(v)
+      return '<div class="confirm"><p class="confirm-q">Cancel ' + esc(label(v)) + '?</p>' +
+        '<p class="confirm-help">' + (o.length ? esc(namesOf(o)) + (o.length > 1 ? ' are' : ' is') + ' going. They’ll see it’s cancelled here.' : 'Nobody else is going.') + '</p>' +
+        (o.length && hasEmail(o) ? '<label class="check"><input type="checkbox" id="c-email-' + id + '" checked> Email ' + esc(namesOf(o)) + ' in Outlook</label>' : '') +
+        '<div class="actions"><button class="btn link" data-do="cancel-confirm">Keep visit</button><button class="btn danger" data-do="delete" data-id="' + id + '">Cancel visit</button></div></div>'
     }
 
     // One field: label, hint, control, and its error right under it.
@@ -618,6 +641,7 @@
           '</div>' +
           field('purpose', 'Purpose and notes (optional)', 'What the visit is for and anything people need to know.', '<CTRL<textarea id="f-purpose" name="purpose" maxlength="1500">' + val('purpose') + '</textarea>') +
           '</div>' +
+          (v && others(v).length && hasEmail(others(v)) ? '<label class="check sheet-check"><input type="checkbox" id="f-notify" checked> Email ' + esc(namesOf(others(v))) + ' about the changes in Outlook</label>' : '') +
           '<p class="notice">Don’t enter customer names, full addresses, contact details or anything about residents or clients here. Keep those in the ' + listLink() + '.</p>' +
           (state.formError ? '<p class="form-error" role="alert">' + esc(state.formError) + '</p>' : ''),
         footer: '<button type="button" class="btn" data-do="close-sheet">Cancel</button><button type="submit" class="btn primary">' + (v ? 'Save changes' : 'Add visit') + '</button>',
@@ -993,18 +1017,20 @@
       state.fieldErrors = checkFields(visit)
       const firstBad = ['code', 'kind', 'town', 'date', 'start', 'end'].find((k) => state.fieldErrors[k])
       if (firstBad) { state.focusField = firstBad; render(); return focusPending() }
+      const before = id ? { ...state.visits.find((x) => x.id === id) } : null
+      const w = id && document.getElementById('f-notify')?.checked ? openComposeWindow() : null
       act(id ? { action: 'update', id, visit } : { action: 'create', visit }, e.target.querySelector('[type=submit]'), (data) => {
         const opener = state.sheetOpener
         state.sheet = null; state.sheetOpener = null; state.draft = null; state.fieldErrors = {}
         setTimeout(() => document.querySelector(opener)?.focus(), 0)
         const v = state.visits.find((x) => x.id === data.id)
         if (id && v && v.attendees.length) {
-          const href = mailto(v, v.attendees, 'changed')
-          toast('Saved. ' + esc(v.attendees.map(first).join(' and ')) + ' will be asked to update their calendar here.' + (href ? ' <a href="' + esc(href) + '">Email them about the change</a>' : ''))
+          if (w) w.location.href = composeUrl(v, others(v), 'changed', before)
+          toast('Visit saved. ' + esc(namesOf(v.attendees)) + ' will be asked to update their calendar here.' + (w ? ' Your email is open in Outlook.' : ''))
         } else if (v) {
           toast(id ? 'Visit saved' : placesLeft(v) ? 'Visit added. The team can now opt in.' : 'Visit added with ' + esc(people(v).filter((p) => p !== state.me.id).map(first).join(' and ') || 'you') + '. It’s full.')
         }
-      })
+      }).then((ok) => { if (!ok && w) w.close() })
     })
 
     app.addEventListener('click', (e) => {
@@ -1076,7 +1102,7 @@
         case 'join':
           state.open.add(id)
           return act({ action: 'join', id }, el, () => {
-            toast('You’re going. Add it to your calendar from the visit. If ' + esc(first(v.organiser)) + ' changes or cancels it, you’ll see it here.')
+            toast('You’re going. Add it to your calendar from the visit. If this visit changes or is cancelled, you’ll see it here.')
           })
         case 'withdraw': {
           const snapshot = { ...v }
@@ -1088,11 +1114,13 @@
         }
         case 'delete': {
           const snapshot = { ...v }
+          const emailThem = document.getElementById('c-email-' + id)?.checked
+          const w = emailThem ? openComposeWindow() : null
           state.confirming = null
           return act({ action: 'delete', id }, el, () => {
-            const href = snapshot.attendees.length ? mailto(snapshot, snapshot.attendees, 'cancelled') : ''
-            toast('Visit to ' + esc(label(snapshot)) + ' deleted.' + (href ? ' <a href="' + esc(href) + '">Email ' + esc(snapshot.attendees.map(first).join(' and ')) + ' about it</a>' : ''))
-          })
+            if (w) w.location.href = composeUrl(snapshot, others(snapshot), 'cancelled')
+            toast('Visit to ' + esc(label(snapshot)) + ' cancelled.' + (w ? ' Your email is open in Outlook.' : ''))
+          }).then((ok) => { if (!ok && w) w.close() })
         }
       }
     })

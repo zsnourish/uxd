@@ -166,7 +166,7 @@ function apply(data, body, me, canManage, team) {
     }
     case 'delete': {
       const visit = find()
-      if (!canManage && visit.organiser !== me.id) throw error('Only this visit’s organiser can delete it.', 400)
+      if (!canManage && visit.organiser !== me.id) throw error('Only this visit’s organiser can cancel it.', 400)
       if (visit.attendees.some((id) => id !== me.id)) {
         // Keep it as cancelled so the people who opted in see the cancellation
         // and can take it out of their calendar.
