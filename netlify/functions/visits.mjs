@@ -26,7 +26,7 @@ import { getStore } from '@netlify/blobs'
 const MAX_PEOPLE = 2 // the organiser plus one other
 const KEY = 'visits'
 const SESSION_COOKIE = 'uxd_session'
-const KINDS = ['Care home', 'Home care agency', 'Other']
+const DEFAULT_TYPES = ['Care home', 'Home care agency', 'Other'] // organisers can change the list on the page
 
 const env = (name) => Netlify.env.get(name) || ''
 const json = (body, status = 200) =>
@@ -62,6 +62,7 @@ export default async (request, context) => {
       viewer: session ? { name: session.name, login: session.login || '', provider: session.provider } : { name: 'Local preview', provider: 'local' },
       local,
       maxPeople: MAX_PEOPLE,
+      types: typesOf(data),
       visits: data.visits,
     })
   }
@@ -82,14 +83,14 @@ export default async (request, context) => {
     try {
       result = apply(data, body, me, canManage, team)
     } catch (error) {
-      return fail(error.message, error.status || 400)
+      return json({ error: error.message, field: error.field || null }, error.status || 400)
     }
     // Live Blobs always returns an ETag; the local `netlify dev` sandbox doesn't,
     // so there the write is unconditional.
     const write = etag
       ? await store.setJSON(KEY, data, { onlyIfMatch: etag })
       : await store.setJSON(KEY, data, exists ? {} : { onlyIfNew: true })
-    if (write.modified) return json({ visits: data.visits, ...result })
+    if (write.modified) return json({ visits: data.visits, types: typesOf(data), ...result })
   }
   return fail('Someone else changed the visits at the same time. Try again.', 409)
 }
@@ -108,7 +109,7 @@ function apply(data, body, me, canManage, team) {
   switch (body.action) {
     case 'create': {
       if (!canManage) throw error('Only organisers can add visits.', 400)
-      const fields = clean(body.visit)
+      const fields = clean(body.visit, typesOf(data))
       const organiser = team.find((m) => m.id === body.visit?.organiser && m.organiser) || team.find((m) => m.organiser) || me
       const visit = {
         id: crypto.randomUUID(),
@@ -130,7 +131,8 @@ function apply(data, body, me, canManage, team) {
       if (!canManage) throw error('Only organisers can edit visits.', 400)
       const visit = find()
       if (visit.status === 'cancelled') throw error('That visit has been deleted.')
-      const fields = clean(body.visit)
+      // A visit can keep a type that has since been taken off the list.
+      const fields = clean(body.visit, [...typesOf(data), visit.kind])
       const timeChanged = ['date', 'start', 'end'].some((k) => fields[k] !== visit[k])
       const placeChanged = fields.town !== visit.town || fields.code !== visit.code
       Object.assign(visit, fields)
@@ -187,30 +189,62 @@ function apply(data, body, me, canManage, team) {
       }
       return { id: visit.id }
     }
+    case 'add-type': {
+      if (!canManage) throw error('Only organisers can change visit types.')
+      const name = typeName(body.name)
+      const types = typesOf(data)
+      if (types.some((t) => t.toLowerCase() === name.toLowerCase())) throw error('That type is already on the list.', 400, 'type-new')
+      if (types.length >= 20) throw error('There can be up to 20 types.', 400, 'type-new')
+      data.types = [...types, name]
+      return { type: name }
+    }
+    case 'rename-type': {
+      if (!canManage) throw error('Only organisers can change visit types.')
+      const types = typesOf(data)
+      const from = String(body.from ?? '')
+      if (!types.includes(from)) throw error('That type no longer exists.', 410)
+      const name = typeName(body.name, 'type-' + types.indexOf(from))
+      if (name !== from && types.some((t) => t.toLowerCase() === name.toLowerCase())) throw error('That type is already on the list.', 400, 'type-' + types.indexOf(from))
+      data.types = types.map((t) => (t === from ? name : t))
+      for (const visit of data.visits) if (visit.kind === from) visit.kind = name
+      return { type: name }
+    }
+    case 'remove-type': {
+      if (!canManage) throw error('Only organisers can change visit types.')
+      const types = typesOf(data)
+      if (types.length <= 1) throw error('Keep at least one type.')
+      // Visits already using it keep their label; it just can't be picked for new ones.
+      data.types = types.filter((t) => t !== body.name)
+      return {}
+    }
     default:
       throw error('Unknown action.')
   }
 }
 
-function clean(input = {}) {
+function clean(input = {}, types = DEFAULT_TYPES) {
   const text = (value, max) => String(value ?? '').trim().slice(0, max)
   const visit = {
     code: text(input.code, 20).toUpperCase(),
-    kind: KINDS.includes(input.kind) ? input.kind : 'Care home',
+    kind: text(input.kind, 40),
     town: area(input.town),
     date: text(input.date, 10),
     start: text(input.start, 5),
     end: text(input.end, 5),
     purpose: text(input.purpose, 1500),
   }
-  if (!/^[A-Z]{1,6}-\d{1,6}$/.test(visit.code)) throw error('Add the customer code: letters, a hyphen, then numbers, for example CH-014. Not the customer’s name.')
-  if (!visit.town) throw error('Add the area, for example Leeds LS1.')
+  // Each message names its field so the page can show it on that field.
+  // Keep these in step with checkFields() in visits.html.
+  if (!/^[A-Z]{1,6}-\d{1,6}$/.test(visit.code)) throw error('Use the customer’s code, like CH-014, not their name.', 400, 'code')
+  if (!types.includes(visit.kind)) throw error('Choose a type from the list.', 400, 'kind')
+  if (!visit.town) throw error('Find the area by postcode or town.', 400, 'town')
   if (!/^[A-Za-z][A-Za-z .'-]{0,39}( [A-Z]{1,2}\d[A-Z\d]?)?$/.test(visit.town)) {
-    throw error('Add the town or city and the first part of the postcode only, for example Leeds LS1. Not the street address or full postcode.')
+    throw error('Use the town and first part of the postcode only, like Leeds LS1.', 400, 'town')
   }
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(visit.date) || Number.isNaN(Date.parse(visit.date))) throw error('Add a date.')
-  if (!/^\d{2}:\d{2}$/.test(visit.start) || !/^\d{2}:\d{2}$/.test(visit.end)) throw error('Add a start and end time.')
-  if (visit.end <= visit.start) throw error('The end time must be after the start time.')
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(visit.date) || Number.isNaN(Date.parse(visit.date))) throw error('Enter the date.', 400, 'date')
+  if (!/^\d{2}:\d{2}$/.test(visit.start)) throw error('Enter the start time.', 400, 'start')
+  if (!/^\d{2}:\d{2}$/.test(visit.end)) throw error('Enter the end time.', 400, 'end')
+  if (visit.end <= visit.start) throw error('The end time must be after the start time.', 400, 'end')
   return visit
 }
 
@@ -256,8 +290,19 @@ function whoIs(session, team) {
 const publicTeam = (team) =>
   team.map(({ id, name, email, organiser, admin }) => ({ id, name, email: email || '', organiser: Boolean(organiser), admin: Boolean(admin) }))
 
-function error(message, status = 400) {
-  return Object.assign(new Error(message), { status })
+function typesOf(data) {
+  return Array.isArray(data.types) && data.types.length ? data.types : DEFAULT_TYPES
+}
+
+function typeName(value, field = 'type-new') {
+  const name = String(value ?? '').replace(/\s+/g, ' ').trim()
+  if (!name) throw error('Enter a name for the type.', 400, field)
+  if (name.length > 40) throw error('Keep type names to 40 characters.', 400, field)
+  return name
+}
+
+function error(message, status = 400, field = null) {
+  return Object.assign(new Error(message), { status, field })
 }
 
 // The same signed session cookie the edge gate checks (see edge-functions/lib/session.js).

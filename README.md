@@ -75,6 +75,13 @@ adds, edits and deletes visits and is always going. Anyone else can opt in while
   Leeds LS1), date, time, purpose and who's going. Caitlin keeps the code-to-customer list herself.
   The API rejects names as codes and street addresses or full postcodes in the area. Past visits
   stay as a history.
+- **Area lookup.** The Area field looks up a postcode, postcode district or town with
+  [postcodes.io](https://postcodes.io) (free UK open data, called from the browser) and saves only
+  "Town OUTCODE". A full postcode typed there is sent to postcodes.io but never stored.
+- **Visit types.** Organisers edit the list in the form ("Edit types"). It's kept in Blobs with the
+  visits. Renaming a type updates visits that use it; removing one leaves it on existing visits.
+- **Errors** show under the field they belong to (client check first, then the API's, which names
+  the field).
 - **Gate.** `netlify/edge-functions/gate.js` (ported from the Pulse docs site) covers `/visits`,
   `/auth/*` and `/api/visits`: GitHub (members of the `nourishcare` org) or the shared team
   password. It fails closed: with no sign-in method set, the area returns 503. The rest of the

@@ -42,6 +42,23 @@
     .field select, .whoami select { appearance: none; -webkit-appearance: none; cursor: pointer; padding-right: 40px;
       background: var(--canvas) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4' fill='none' stroke='%235f6f66' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 12px center / 16px 16px; }
     .form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+    .field.invalid input, .field.invalid select { border-color: var(--bad); box-shadow: 0 0 0 1px var(--bad); }
+    .field-error { margin: 6px 0 0; font-size: 13px; font-weight: 600; color: var(--bad); }
+    .label-row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+    .label-row .btn.link { font-size: 13px; padding: 0 4px; }
+    .combo { position: relative; }
+    .combo-list { position: absolute; z-index: 20; left: 0; right: 0; top: calc(100% + 4px); margin: 0; padding: 4px; list-style: none;
+      background: var(--canvas); border-radius: var(--radius); box-shadow: 0 0 0 1px var(--line), 0 12px 28px -12px rgb(20 38 29 / 0.25); max-height: 280px; overflow: auto; }
+    .combo-list[hidden] { display: none; }
+    .combo-list li { padding: 8px 10px; border-radius: 6px; cursor: pointer; font-size: 15px; color: var(--ink); }
+    .combo-list li small { display: block; font-size: 13px; color: var(--muted); }
+    .combo-list li[aria-selected="true"], .combo-list li:hover { background: var(--tint-2); }
+    .combo-list li.empty { cursor: default; color: var(--muted); background: none; }
+    .types-editor { grid-column: 1 / -1; background: var(--tint); border-radius: var(--radius); padding: 12px 14px; }
+    .types-editor h3 { margin: 0 0 8px; font-size: 14px; color: var(--ink); }
+    .type-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+    .type-row input { flex: 1; min-width: 160px; font: inherit; font-size: 15px; padding: 7px 10px; border-radius: var(--radius); border: 1px solid #c9d6ce; background: var(--canvas); color: var(--ink); }
+    .type-row .field-error { flex-basis: 100%; margin: 0; }
     .form-error { margin: 14px 0 0; padding: 10px 12px; border-radius: var(--radius); background: var(--bad-bg); color: var(--bad); font-size: 14px; }
 
     .visit { background: var(--canvas); border-radius: var(--radius-lg); box-shadow: var(--ring); margin-bottom: 8px; transition: box-shadow 0.15s; }
@@ -121,8 +138,7 @@
   (() => {
     const SITE = location.origin
     const ME_KEY = 'uxd-visits-me'
-    const KINDS = ['Care home', 'Home care agency', 'Other']
-    const state = { team: [], visits: [], maxPeople: 2, viewer: null, local: false, open: new Set(), me: null, editing: null, adding: false, confirming: null, flash: {}, formError: '' }
+        const state = { team: [], visits: [], maxPeople: 2, viewer: null, local: false, open: new Set(), me: null, editing: null, adding: false, confirming: null, flash: {}, formError: '', fieldErrors: {}, types: ['Care home', 'Home care agency', 'Other'], managingTypes: false, focusField: null }
     const app = document.getElementById('app')
 
     // ── Local previews only: who to act as (live, it comes from the GitHub sign-in) ──
@@ -154,7 +170,7 @@
       })
       const data = await res.json().catch(() => ({}))
       if (res.status === 401) { location.href = '/visits'; throw new Error('Signed out') }
-      if (!res.ok) throw new Error(data.error || 'Something went wrong (' + res.status + ').')
+      if (!res.ok) throw Object.assign(new Error(data.error || 'Something went wrong (' + res.status + ').'), { field: data.field || null })
       return data
     }
 
@@ -163,6 +179,7 @@
         const data = await api()
         state.team = data.team
         state.maxPeople = data.maxPeople
+        state.types = data.types || state.types
         state.visits = data.visits
         state.viewer = data.viewer
         state.local = Boolean(data.local)
@@ -179,13 +196,17 @@
       try {
         const data = await api(body)
         state.visits = data.visits
+        if (data.types) state.types = data.types
         after && after(data)
       } catch (err) {
-        state.flash[body.id || 'form'] = { tone: 'bad', html: esc(err.message) }
-        if (!body.id) state.formError = err.message
+        const formAction = ['create', 'update', 'add-type', 'rename-type', 'remove-type'].includes(body.action)
+        if (formAction && err.field) { state.fieldErrors = { [err.field]: err.message }; state.focusField = err.field }
+        else if (formAction) state.formError = err.message
+        else state.flash[body.id] = { tone: 'bad', html: esc(err.message) }
         await refreshQuietly()
       }
       render()
+      focusPending()
     }
 
     async function refreshQuietly() {
@@ -407,25 +428,187 @@
         '<div class="actions"><button class="btn danger" data-do="delete" data-id="' + id + '">Delete visit</button><button class="btn link" data-do="cancel-confirm">Keep visit</button></div></div>'
     }
 
+    // One field: label, hint, control, and its error right under it.
+    function field(name, label, hint, control, opts = {}) {
+      const err = state.fieldErrors[name]
+      const ids = [hint ? 'h-' + name : '', err ? 'e-' + name : ''].filter(Boolean).join(' ')
+      // <CTRL marks the element that gets the hint, error and invalid state.
+      const attrs = (ids ? ' aria-describedby="' + ids + '"' : '') + (err ? ' aria-invalid="true"' : '')
+      control = control.replace(/<CTRL<(\w+)/, '<$1' + attrs)
+      return '<div class="field' + (opts.full ? ' full' : '') + (err ? ' invalid' : '') + '">' +
+        '<div class="label-row"><label for="f-' + name + '">' + label + '</label>' + (opts.extra || '') + '</div>' +
+        (hint ? '<p class="hint" id="h-' + name + '">' + hint + '</p>' : '') + control +
+        (err ? '<p class="field-error" id="e-' + name + '">' + esc(err) + '</p>' : '') + '</div>'
+    }
+
     function form(v) {
       const src = state.draft || v
       const val = (k, d = '') => esc(src ? src[k] : d)
+      const kind = src ? src.kind : state.types[0]
+      const kinds = state.types.includes(kind) || !kind ? state.types : [...state.types, kind]
+      const manage = canManage() ? '<button type="button" class="btn link" data-do="toggle-types" aria-expanded="' + state.managingTypes + '">' + (state.managingTypes ? 'Done' : 'Edit types') + '</button>' : ''
       return '<form class="panel" id="visit-form" data-id="' + (v ? esc(v.id) : '') + '" novalidate>' +
         '<h2>' + (v ? 'Edit visit' : 'Add a visit') + '</h2>' +
         '<p class="lede">' + (v ? 'If someone has opted in, they’ll be asked to update their calendar.' : esc(member((state.team.find((m) => m.organiser) || state.me).id).name) + ' is the organiser and is going by default.') + '</p>' +
         '<div class="form-grid">' +
-        '<div class="field"><label for="f-code">Customer code</label><p class="hint">For example CH-014, from the customer list.</p><input id="f-code" name="code" required maxlength="20" autocomplete="off" value="' + val('code') + '"></div>' +
-        '<div class="field"><label for="f-kind">Type</label><p class="hint">&nbsp;</p><select id="f-kind" name="kind">' + KINDS.map((k) => '<option' + ((src ? src.kind : 'Care home') === k ? ' selected' : '') + '>' + k + '</option>').join('') + '</select></div>' +
-        '<div class="field"><label for="f-town">Area</label><p class="hint">Town or city and the first part of the postcode, for example Leeds LS1.</p><input id="f-town" name="town" required maxlength="60" value="' + val('town') + '"></div>' +
-        '<div class="full times"><div class="field"><label for="f-date">Date</label><input id="f-date" name="date" type="date" required value="' + val('date') + '"></div>' +
-        '<div class="field"><label for="f-start">Start</label><input id="f-start" name="start" type="time" required value="' + val('start', '10:00') + '"></div>' +
-        '<div class="field"><label for="f-end">End</label><input id="f-end" name="end" type="time" required value="' + val('end', '12:00') + '"></div></div>' +
-        '<div class="field full"><label for="f-purpose">Purpose and notes (optional)</label><p class="hint">What the visit is for and anything people need to know.</p><textarea id="f-purpose" name="purpose" maxlength="1500">' + val('purpose') + '</textarea></div>' +
+        field('code', 'Customer code', 'The code you use in place of this customer’s name, for example CH-014. Never the name itself.', '<CTRL<input id="f-code" name="code" maxlength="20" autocomplete="off" placeholder="CH-014" value="' + val('code') + '">') +
+        field('kind', 'Type', '', '<CTRL<select id="f-kind" name="kind">' + kinds.map((k) => '<option' + (kind === k ? ' selected' : '') + '>' + esc(k) + '</option>').join('') + '</select>', { extra: manage }) +
+        (state.managingTypes ? typesEditor() : '') +
+        field('town', 'Area', 'Type a postcode or town, then pick from the list. Only the town and first part of the postcode are saved.',
+          '<div class="combo"><CTRL<input id="f-town" name="town" maxlength="60" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="f-town-list" placeholder="LS1 4AP or Leeds" value="' + val('town') + '">' +
+          '<ul class="combo-list" id="f-town-list" role="listbox" aria-label="Matching areas" hidden></ul></div>', { full: true }) +
+        '<div class="full times">' +
+        field('date', 'Date', '', '<CTRL<input id="f-date" name="date" type="date" value="' + val('date') + '">') +
+        field('start', 'Start', '', '<CTRL<input id="f-start" name="start" type="time" value="' + val('start', '10:00') + '">') +
+        field('end', 'End', '', '<CTRL<input id="f-end" name="end" type="time" value="' + val('end', '12:00') + '">') +
+        '</div>' +
+        field('purpose', 'Purpose and notes (optional)', 'What the visit is for and anything people need to know.', '<CTRL<textarea id="f-purpose" name="purpose" maxlength="1500">' + val('purpose') + '</textarea>', { full: true }) +
         '</div>' +
         '<p class="notice" style="margin-top:16px">Don’t enter customer names, full addresses, contact details or anything about residents or clients here. Keep those in Caitlin’s customer list.</p>' +
         (state.formError ? '<p class="form-error" role="alert">' + esc(state.formError) + '</p>' : '') +
         '<div class="form-actions"><button type="button" class="btn link" data-do="close-form">Cancel</button><button type="submit" class="btn primary">' + (v ? 'Save changes' : 'Add visit') + '</button></div></form>'
     }
+
+    function typesEditor() {
+      const rows = state.types.map((t, i) => {
+        const err = state.fieldErrors['type-' + i]
+        return '<div class="type-row"><input id="f-type-' + i + '" value="' + esc(t) + '" aria-label="Type name" data-type="' + esc(t) + '"' + (err ? ' aria-invalid="true" aria-describedby="e-type-' + i + '"' : '') + '>' +
+          '<button type="button" class="btn" data-do="rename-type" data-type="' + esc(t) + '" data-index="' + i + '">Save</button>' +
+          (state.types.length > 1 ? '<button type="button" class="btn link danger-text" data-do="remove-type" data-type="' + esc(t) + '">Remove</button>' : '') +
+          (err ? '<p class="field-error" id="e-type-' + i + '">' + esc(err) + '</p>' : '') + '</div>'
+      }).join('')
+      const err = state.fieldErrors['type-new']
+      return '<div class="types-editor"><h3>Visit types</h3>' + rows +
+        '<div class="type-row"><input id="f-type-new" placeholder="New type, for example Supported living" aria-label="New type"' + (err ? ' aria-invalid="true" aria-describedby="e-type-new"' : '') + '>' +
+        '<button type="button" class="btn" data-do="add-type">Add type</button>' +
+        (err ? '<p class="field-error" id="e-type-new">' + esc(err) + '</p>' : '') + '</div>' +
+        '<p class="hint" style="margin:4px 0 0">Renaming a type updates the visits that use it. Removing one keeps it on existing visits.</p></div>'
+    }
+
+    // Same rules as clean() in the visits function, so most errors show before saving.
+    function checkFields(visit) {
+      const errors = {}
+      if (!/^[A-Za-z]{1,6}-\d{1,6}$/.test(visit.code.trim())) errors.code = 'Use the customer’s code, like CH-014, not their name.'
+      if (!visit.town.trim()) errors.town = 'Find the area by postcode or town.'
+      if (!visit.date) errors.date = 'Enter the date.'
+      if (!visit.start) errors.start = 'Enter the start time.'
+      if (!visit.end) errors.end = 'Enter the end time.'
+      else if (visit.start && visit.end <= visit.start) errors.end = 'The end time must be after the start time.'
+      return errors
+    }
+
+    function readForm() {
+      const el = document.getElementById('visit-form')
+      if (!el) return null
+      const f = new FormData(el)
+      return Object.fromEntries(['code', 'kind', 'town', 'date', 'start', 'end', 'purpose'].map((k) => [k, (f.get(k) || '').toString()]))
+    }
+
+    function focusPending() {
+      if (!state.focusField) return
+      const el = document.getElementById('f-' + state.focusField)
+      state.focusField = null
+      el?.focus()
+    }
+
+    // ── Area lookup (postcodes.io, free UK open data; the browser asks it directly) ──
+    const POSTCODES = 'https://api.postcodes.io'
+    const tidyDistrict = (d) => String(d || '').replace(/, (City|County) of$/i, '')
+    let lookupTimer = null, lookupSeq = 0, comboItems = [], comboActive = -1
+    async function lookupArea(q) {
+      const raw = q.trim()
+      const compact = raw.toUpperCase().replace(/\s+/g, '')
+      const get = async (path) => { const r = await fetch(POSTCODES + path); return r.ok ? (await r.json()).result : null }
+      if (/^[A-Z]{1,2}\d[A-Z\d]?\d[A-Z]{2}$/.test(compact)) {
+        const r = await get('/postcodes/' + compact)
+        return r ? [{ label: tidyDistrict(r.admin_district) + ' ' + r.outcode, sub: 'From ' + r.postcode }] : []
+      }
+      const out = compact.match(/^([A-Z]{1,2}\d[A-Z\d]?)\d?[A-Z]?$/)
+      if (out && /\d/.test(compact)) {
+        const r = await get('/outcodes/' + out[1])
+        return r ? (r.admin_district || []).map((d) => ({ label: tidyDistrict(d) + ' ' + r.outcode, sub: 'Postcode district ' + r.outcode })) : []
+      }
+      if (raw.length < 2) return []
+      const places = (await get('/places?limit=12&q=' + encodeURIComponent(raw))) || []
+      const seen = new Set()
+      return places
+        .filter((p) => p.outcode && /City|Town|Village|Suburban Area|Hamlet|Other Settlement/.test(p.local_type || ''))
+        .map((p) => ({ label: p.name_1 + ' ' + p.outcode, sub: [p.local_type, p.county_unitary || p.district_borough || p.region].filter(Boolean).join(', ') }))
+        .filter((o) => !seen.has(o.label) && seen.add(o.label))
+        .slice(0, 8)
+    }
+    function showCombo(items, message) {
+      const input = document.getElementById('f-town'), list = document.getElementById('f-town-list')
+      if (!input || !list) return
+      comboItems = items; comboActive = items.length ? 0 : -1
+      list.innerHTML = items.length
+        ? items.map((o, i) => '<li role="option" id="f-town-opt-' + i + '" data-index="' + i + '" aria-selected="' + (i === comboActive) + '">' + esc(o.label) + (o.sub ? '<small>' + esc(o.sub) + '</small>' : '') + '</li>').join('')
+        : '<li class="empty" aria-disabled="true">' + esc(message || 'No matches. Try the full postcode.') + '</li>'
+      list.hidden = false
+      input.setAttribute('aria-expanded', 'true')
+      input.setAttribute('aria-activedescendant', items.length ? 'f-town-opt-0' : '')
+    }
+    function hideCombo() {
+      const input = document.getElementById('f-town'), list = document.getElementById('f-town-list')
+      if (list) list.hidden = true
+      if (input) { input.setAttribute('aria-expanded', 'false'); input.removeAttribute('aria-activedescendant') }
+      comboItems = []; comboActive = -1
+    }
+    function pickArea(i) {
+      const o = comboItems[i], input = document.getElementById('f-town')
+      if (!o || !input) return
+      input.value = o.label
+      hideCombo()
+      if (state.fieldErrors.town) {
+        delete state.fieldErrors.town
+        const fieldEl = input.closest('.field')
+        fieldEl.classList.remove('invalid'); fieldEl.querySelector('.field-error')?.remove(); input.removeAttribute('aria-invalid')
+      }
+    }
+    function moveCombo(step) {
+      if (!comboItems.length) return
+      comboActive = (comboActive + step + comboItems.length) % comboItems.length
+      document.querySelectorAll('#f-town-list [role=option]').forEach((li, i) => li.setAttribute('aria-selected', String(i === comboActive)))
+      document.getElementById('f-town').setAttribute('aria-activedescendant', 'f-town-opt-' + comboActive)
+      document.getElementById('f-town-opt-' + comboActive)?.scrollIntoView({ block: 'nearest' })
+    }
+    app.addEventListener('input', (e) => {
+      if (e.target.id !== 'f-town') return
+      clearTimeout(lookupTimer)
+      const q = e.target.value
+      if (q.trim().length < 2) return hideCombo()
+      const seq = ++lookupSeq
+      lookupTimer = setTimeout(async () => {
+        try {
+          const items = await lookupArea(q)
+          if (seq === lookupSeq) showCombo(items)
+        } catch {
+          if (seq === lookupSeq) showCombo([], 'Couldn’t look that up. Type the town and first part of the postcode, like Leeds LS1.')
+        }
+      }, 250)
+    })
+    // Enter in the types editor saves that row rather than submitting the visit.
+    app.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' || !e.target.id?.startsWith('f-type-')) return
+      e.preventDefault()
+      const row = e.target.closest('.type-row')
+      row?.querySelector('[data-do="add-type"], [data-do="rename-type"]')?.click()
+    })
+    app.addEventListener('keydown', (e) => {
+      if (e.target.id !== 'f-town' || document.getElementById('f-town-list')?.hidden) return
+      if (e.key === 'ArrowDown') { e.preventDefault(); moveCombo(1) }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); moveCombo(-1) }
+      else if (e.key === 'Enter' && comboActive >= 0) { e.preventDefault(); pickArea(comboActive) }
+      else if (e.key === 'Escape') { e.preventDefault(); hideCombo() }
+    })
+    app.addEventListener('mousedown', (e) => {
+      const li = e.target.closest('#f-town-list [role=option]')
+      if (li) { e.preventDefault(); pickArea(Number(li.dataset.index)) }
+    })
+    app.addEventListener('focusout', (e) => {
+      if (e.target.id === 'f-town') setTimeout(hideCombo, 100)
+    })
+
 
     // ── Events ──
     app.addEventListener('change', (e) => {
@@ -440,13 +623,15 @@
     app.addEventListener('submit', (e) => {
       if (e.target.id !== 'visit-form') return
       e.preventDefault()
-      const f = new FormData(e.target)
-      const visit = Object.fromEntries(['code', 'kind', 'town', 'date', 'start', 'end', 'purpose'].map((k) => [k, (f.get(k) || '').toString()]))
+      const visit = readForm()
       const id = e.target.dataset.id
       state.formError = ''
       state.draft = visit
+      state.fieldErrors = checkFields(visit)
+      const firstBad = ['code', 'kind', 'town', 'date', 'start', 'end'].find((k) => state.fieldErrors[k])
+      if (firstBad) { state.focusField = firstBad; render(); return focusPending() }
       act(id ? { action: 'update', id, visit } : { action: 'create', visit }, e.target.querySelector('[type=submit]'), (data) => {
-        state.adding = false; state.editing = null; state.draft = null
+        state.adding = false; state.editing = null; state.draft = null; state.fieldErrors = {}; state.managingTypes = false
         const v = state.visits.find((x) => x.id === data.id)
         if (id && v && v.attendees.length) {
           const href = mailto(v, v.attendees, 'changed')
@@ -471,15 +656,32 @@
           if (!chosen) return
           writeMe(chosen); state.me = member(chosen); return render()
         }
-        case 'add': state.adding = true; state.editing = null; state.formError = ''; state.draft = null; render(); return document.getElementById('f-code')?.focus()
-        case 'edit': state.editing = id; state.adding = false; state.formError = ''; state.draft = null; render(); return document.getElementById('f-code')?.focus()
-        case 'close-form': state.adding = false; state.editing = null; state.formError = ''; state.draft = null; return render()
+        case 'add': state.adding = true; state.editing = null; state.formError = ''; state.fieldErrors = {}; state.managingTypes = false; state.draft = null; render(); return document.getElementById('f-code')?.focus()
+        case 'edit': state.editing = id; state.adding = false; state.formError = ''; state.fieldErrors = {}; state.managingTypes = false; state.draft = null; render(); return document.getElementById('f-code')?.focus()
+        case 'close-form': state.adding = false; state.editing = null; state.formError = ''; state.fieldErrors = {}; state.managingTypes = false; state.draft = null; return render()
         case 'toggle':
           if (state.open.has(id)) state.open.delete(id); else state.open.add(id)
           return render()
         case 'ask-withdraw': state.confirming = { id, kind: 'withdraw' }; return render()
         case 'ask-delete': state.confirming = { id, kind: 'delete' }; return render()
         case 'cancel-confirm': state.confirming = null; return render()
+        case 'toggle-types':
+          state.draft = readForm(); state.managingTypes = !state.managingTypes; state.fieldErrors = {}; render()
+          return document.getElementById(state.managingTypes ? 'f-type-new' : 'f-kind')?.focus()
+        case 'add-type': {
+          state.draft = readForm(); state.fieldErrors = {}
+          const name = document.getElementById('f-type-new').value
+          return act({ action: 'add-type', name }, el, (data) => { if (state.draft) state.draft.kind = data.type; state.focusField = 'type-new' })
+        }
+        case 'rename-type': {
+          state.draft = readForm(); state.fieldErrors = {}
+          const from = el.dataset.type, name = document.getElementById('f-type-' + el.dataset.index).value
+          return act({ action: 'rename-type', from, name }, el, (data) => { if (state.draft?.kind === from) state.draft.kind = data.type })
+        }
+        case 'remove-type': {
+          state.draft = readForm(); state.fieldErrors = {}
+          return act({ action: 'remove-type', name: el.dataset.type }, el)
+        }
         case 'ics': return download(v, false)
         case 'ics-update': download(v, false); return act({ action: 'seen', id }, el)
         case 'ics-cancel': download(v, true); return act({ action: 'seen', id }, el)
