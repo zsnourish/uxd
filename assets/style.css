@@ -231,13 +231,10 @@ footer.site { display: flex; align-items: center; justify-content: center; gap: 
 .event-meta { font-size: 13px; color: var(--muted); margin-top: 2px; }
 .event-meta a { color: var(--sage-deep); font-weight: 600; text-decoration: none; }
 .event-meta a:hover { text-decoration: underline; }
-.event-details { margin-top: 4px; }
-.event-details summary {
-  list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;
-  font-size: 12px; font-weight: 700; color: var(--sage);
+.event-row .event-notes { font-size: 13px; color: var(--muted); margin-top: 4px; line-height: 1.55; }
+.event-notes.clamped { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.read-more {
+  appearance: none; border: 0; background: none; padding: 0; margin-top: 2px; cursor: pointer;
+  font: inherit; font-size: 12px; font-weight: 700; color: var(--sage);
 }
-.event-details summary::-webkit-details-marker { display: none; }
-.event-details summary::after { content: '▾'; font-size: 10px; transition: transform 0.15s; }
-.event-details[open] summary::after { transform: rotate(180deg); }
-.event-details summary:hover { color: var(--sage-deep); }
-.event-details .event-notes { font-size: 13px; color: var(--muted); margin-top: 6px; line-height: 1.55; }
+.read-more:hover { color: var(--sage-deep); text-decoration: underline; }

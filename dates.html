@@ -87,6 +87,7 @@
         }
 
         el.innerHTML = html;
+        wireReadMore();
       } catch (err) {
         el.innerHTML = '<div class="state error">Couldn\'t load events right now (' + err.message + '). Check that the Netlify function is deployed and NOTION_TOKEN is set.</div>';
       }
@@ -116,7 +117,7 @@
         (end ? ' to ' + end.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }) : '');
       const meta = renderMeta(item.location);
       const notes = item.notes && item.notes.length
-        ? '<details class="event-details"><summary>Details</summary><div class="event-notes">' + renderRich(item.notes) + '</div></details>'
+        ? '<div class="event-notes clamped">' + renderRich(item.notes) + '</div>'
         : '';
       return (
         '<div class="event-row ' + catClass + '">' +
@@ -130,6 +131,22 @@
           '</div>' +
         '</div>'
       );
+    }
+
+    // Notes show up to 2 lines; Read more appears only when they run longer.
+    function wireReadMore() {
+      document.querySelectorAll('.event-notes.clamped').forEach(n => {
+        if (n.scrollHeight <= n.clientHeight + 1) { n.classList.remove('clamped'); return; }
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'read-more'; b.textContent = 'Read more';
+        b.setAttribute('aria-expanded', 'false');
+        b.addEventListener('click', () => {
+          const open = !n.classList.toggle('clamped');
+          b.textContent = open ? 'Read less' : 'Read more';
+          b.setAttribute('aria-expanded', String(open));
+        });
+        n.after(b);
+      });
     }
 
     // One quiet line: venue (linked to the map) · town.
