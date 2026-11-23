@@ -94,6 +94,11 @@
     .toast .icon-btn { width: 24px; height: 24px; margin: -2px -4px 0 auto; color: inherit; }
     .toast.fade { opacity: 0; }
     .list-link { margin: 0; font-size: 14px; font-weight: 600; }
+    .badge { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px 3px 8px; border-radius: 999px; font-size: 13px; font-weight: 700; line-height: 18px; white-space: nowrap; }
+    .badge::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+    .badge-going { background: var(--tint-2); color: var(--sage-deep); }
+    .badge-full { background: #eceeed; color: #46554c; }
+    .badge-bad { background: var(--bad-bg); color: var(--bad); }
     .auto-note { font-size: 13px; font-weight: 600; color: var(--sage-deep); }
     .label-row .label-extras { display: flex; align-items: center; gap: 10px; }
     .sheet-search { margin-bottom: 8px; }
@@ -470,7 +475,8 @@
       const id = esc(v.id)
       const changed = changedForMe(v) && !past
       const flash = state.flash[v.id]
-      const notice = !past ? noticeFor(v) : null
+      // A cancellation outranks an "added you" notice.
+      const notice = !past && !(cancelled && noticeFor(v)?.type === 'added') ? noticeFor(v) : null
       const open = state.open.has(v.id) || changed || Boolean(notice) || Boolean(flash) || state.confirming?.id === v.id
 
       let alert = ''
@@ -484,11 +490,11 @@
       }
 
       let side = ''
-      if (cancelled) side = '<span class="bad">Cancelled</span>'
+      if (cancelled) side = '<span class="badge badge-bad">Cancelled</span>'
       else if (past) side = ''
-      else if (mine) side = '<span class="going">You’re going</span>'
+      else if (mine) side = '<span class="badge badge-going">You’re going</span>'
       else if (left > 0 && state.me) side = '<button class="btn primary" data-do="join" data-id="' + id + '">Opt in</button>'
-      else if (!left) side = '<span class="muted">Full</span>'
+      else if (!left) side = '<span class="badge badge-full">Full</span>'
 
       let menu = ''
       if (canEdit(v) && !cancelled && !past) {

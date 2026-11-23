@@ -171,6 +171,8 @@ function apply(data, body, me, canManage, team) {
         // Keep it as cancelled so the people who opted in see the cancellation
         // and can take it out of their calendar.
         visit.status = 'cancelled'
+        // "Added you" notices no longer apply; the cancellation replaces them.
+        for (const [id, n] of Object.entries(visit.notices || {})) if (n.type === 'added') delete visit.notices[id]
         visit.sequence += 1
         visit.updatedAt = now
         visit.updatedBy = me.id
