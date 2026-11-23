@@ -60,7 +60,11 @@ function locationOf(prop) {
     let detail = parts.length > 1 ? parts[parts.length - 1] : '';
     if (detail && name && detail.toLowerCase() === name.toLowerCase()) detail = '';
     const q = (address && name && address.toLowerCase().startsWith(name.toLowerCase()) ? address : [name, address].filter(Boolean).join(', ')) || (lat != null ? `${lat},${lon}` : '');
-    return { name: name || detail, detail: name ? detail : '', mapUrl: q ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}` : null };
+    const mapUrl = q ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}` : null;
+    // A town or city on its own comes through as "Bristol, England, United Kingdom":
+    // show just "Bristol". The map link still uses the full string.
+    if (name.includes(',')) return { name: name.split(',')[0].trim(), detail: '', mapUrl };
+    return { name: name || detail, detail: name ? detail : '', mapUrl };
   }
   const rich = prop.rich_text || prop.title;
   if (rich) {
