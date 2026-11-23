@@ -127,6 +127,16 @@ export async function handleAuth(request, url) {
   return null
 }
 
+function onTeamList(login, emails) {
+  try {
+    const team = JSON.parse(env('VISITS_TEAM') || '[]')
+    const handle = String(login || '').toLowerCase()
+    return team.some((m) => (m.github && m.github.toLowerCase() === handle) || (m.email && emails.includes(m.email.toLowerCase())))
+  } catch {
+    return false
+  }
+}
+
 async function githubUser(code, url) {
   const tokenRes = await fetch('https://github.com/login/oauth/access_token', {
     method: 'POST',
@@ -145,22 +155,24 @@ async function githubUser(code, url) {
       headers: { Authorization: `Bearer ${access_token}`, Accept: 'application/vnd.github+json', 'User-Agent': 'uxd-noticeboard' },
     })
   const me = await (await gh('/user')).json()
-  const org = env('GITHUB_ORG') || 'nourishcare'
-  const membership = await gh(`/user/memberships/orgs/${org}`)
-  const state = membership.ok ? (await membership.json()).state : null
-  if (state !== 'active') {
-    throw new Error(
-      membership.status === 403
-        ? `GitHub didn’t let the noticeboard check your ${org} membership. An organisation owner needs to approve the UX and Design noticeboard app.`
-        : `Site visits are for members of the ${org} GitHub organisation. Use the shared password instead, or ask to be added.`,
-    )
-  }
   // Verified emails let the site visits page match people to the team list
   // when their GitHub handle isn't on it.
   const emailsRes = await gh('/user/emails')
   const emails = emailsRes.ok
     ? (await emailsRes.json()).filter((e) => e.verified).map((e) => String(e.email).toLowerCase()).slice(0, 10)
     : []
+
+  // People on the team list (VISITS_TEAM) get in on that alone: it's a stricter
+  // allow-list than organisation membership, and it doesn't need an organisation
+  // owner to approve this app. Anyone else must be an active nourishcare member.
+  if (!onTeamList(me.login, emails)) {
+    const org = env('GITHUB_ORG') || 'nourishcare'
+    const membership = await gh(`/user/memberships/orgs/${org}`)
+    const state = membership.ok ? (await membership.json()).state : null
+    if (state !== 'active') {
+      throw new Error(`Site visits are for the UX and Design team. Your GitHub account (${me.login}) isn’t on the team list, so ask Zahra to add it, or use the shared password.`)
+    }
+  }
   return { sub: `github:${me.id}`, name: me.name || me.login, login: me.login, emails, provider: 'github' }
 }
 
