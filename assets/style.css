@@ -233,6 +233,7 @@ footer.site { display: flex; align-items: center; justify-content: center; gap: 
   .brand-logo { height: 24px; }
   .brand-divider { height: 24px; }
   .hero::after { width: 140px; height: 140px; right: -30px; top: -20px; }
+  nav.tabs { margin-left: -10px; }
   nav.tabs a { padding: 6px 10px; }
 }
 
