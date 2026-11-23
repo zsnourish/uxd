@@ -61,6 +61,7 @@ header.site {
 header.site .wrap { padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .brand { display: flex; align-items: center; gap: 14px; text-decoration: none; color: var(--ink); }
 .brand-logo { height: 34px; width: auto; display: block; }
+.brand-mark { display: none; height: 28px; width: auto; }
 .brand-divider { width: 1px; height: 30px; background: var(--line); }
 .brand-text { display: flex; flex-direction: column; gap: 3px; line-height: 1.2; }
 .brand-text strong { font-size: 15px; font-weight: 700; color: var(--ink); }
@@ -225,17 +226,22 @@ footer.site { display: flex; align-items: center; justify-content: center; gap: 
 .quarter-panel.active { display: block; }
 
 @media (max-width: 560px) {
-  .filters { flex-wrap: wrap; gap: 8px; }
-  .chips { flex-basis: 100%; }
-  header.site .wrap { flex-direction: column; justify-content: center; gap: 8px; padding: 12px 16px; }
+  header.site .wrap { gap: 12px; padding: 10px 16px; }
+  .brand-logo, .brand-divider, .brand-text { display: none; }
+  .brand-mark { display: block; }
+  nav.tabs { margin-right: -10px; }
+  nav.tabs a { padding: 6px 10px; }
   .wrap, .hero .wrap { padding-left: 16px; padding-right: 16px; }
   h1.page-title { font-size: 26px; }
-  .brand-logo { height: 24px; }
-  .brand-divider { height: 24px; }
   .hero::after { width: 140px; height: 140px; right: -30px; top: -20px; }
-  nav.tabs { justify-content: center; }
-  nav.tabs a { padding: 6px 10px; }
+  .filters { flex-wrap: wrap; gap: 8px; }
+  .chips { display: contents; }
+  .filters { gap: 10px 6px; }
+  .filters-label, .chip-more { display: none; }
+  .chip { padding: 0 11px 0 10px; gap: 6px; font-size: 13px; }
+  .chip-clear { padding: 0 2px; }
 }
+
 
 /* Icons (Phosphor) and links */
 .ph { line-height: 1; }
