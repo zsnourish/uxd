@@ -8,8 +8,8 @@
 
   --ink: #14261d;
   --text: #33423a;
-  --muted: #5f6f66;
-  --faint: #66756c;
+  --muted: #46554c;   /* 7.9:1 on white */
+  --faint: #5f6f66;   /* 5.3:1 on white, AA for small text */
   --line: #e2ebe5;
   --line-soft: #eef3f0;
   --canvas: #ffffff;
