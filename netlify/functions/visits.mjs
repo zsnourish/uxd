@@ -193,8 +193,8 @@ function apply(data, body, me, canManage, team) {
       if (!canManage) throw error('Only organisers can change visit types.')
       const name = typeName(body.name)
       const types = typesOf(data)
-      if (types.some((t) => t.toLowerCase() === name.toLowerCase())) throw error('That type is already on the list.', 400, 'type-new')
-      if (types.length >= 20) throw error('There can be up to 20 types.', 400, 'type-new')
+      if (types.some((t) => t.toLowerCase() === name.toLowerCase())) throw error('That type is already on the list.', 400, 'type')
+      if (types.length >= 20) throw error('There can be up to 20 types.', 400, 'type')
       data.types = [...types, name]
       return { type: name }
     }
@@ -203,8 +203,8 @@ function apply(data, body, me, canManage, team) {
       const types = typesOf(data)
       const from = String(body.from ?? '')
       if (!types.includes(from)) throw error('That type no longer exists.', 410)
-      const name = typeName(body.name, 'type-' + types.indexOf(from))
-      if (name !== from && types.some((t) => t.toLowerCase() === name.toLowerCase())) throw error('That type is already on the list.', 400, 'type-' + types.indexOf(from))
+      const name = typeName(body.name)
+      if (name !== from && types.some((t) => t.toLowerCase() === name.toLowerCase())) throw error('That type is already on the list.', 400, 'type')
       data.types = types.map((t) => (t === from ? name : t))
       for (const visit of data.visits) if (visit.kind === from) visit.kind = name
       return { type: name }
@@ -294,7 +294,7 @@ function typesOf(data) {
   return Array.isArray(data.types) && data.types.length ? data.types : DEFAULT_TYPES
 }
 
-function typeName(value, field = 'type-new') {
+function typeName(value, field = 'type') {
   const name = String(value ?? '').replace(/\s+/g, ' ').trim()
   if (!name) throw error('Enter a name for the type.', 400, field)
   if (name.length > 40) throw error('Keep type names to 40 characters.', 400, field)

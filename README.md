@@ -78,7 +78,9 @@ adds, edits and deletes visits and is always going. Anyone else can opt in while
 - **Area lookup.** The Area field looks up a postcode, postcode district or town with
   [postcodes.io](https://postcodes.io) (free UK open data, called from the browser) and saves only
   "Town OUTCODE". A full postcode typed there is sent to postcodes.io but never stored.
-- **Visit types.** Organisers edit the list in the form ("Edit types"). It's kept in Blobs with the
+- **Sheets.** Adding or editing a visit and managing visit types open in a side sheet (bottom sheet
+  on phones). Drill-ins replace the sheet's content with a Back button; sheets never stack.
+- **Visit types.** Organisers edit the list from "Visit types" or the form's "Edit types". It's kept in Blobs with the
   visits. Renaming a type updates visits that use it; removing one leaves it on existing visits.
 - **Errors** show under the field they belong to (client check first, then the API's, which names
   the field).
