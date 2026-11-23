@@ -22,6 +22,7 @@
 // on the shared team password can see visits but can't opt in or change anything.
 // Team entries can carry "github": "handle".
 import { getStore } from '@netlify/blobs'
+import SEED_CODES from '../lib/visit-codes.mjs'
 
 const MAX_PEOPLE = 2 // the organiser plus one other
 const KEY = 'visits'
@@ -63,6 +64,8 @@ export default async (request, context) => {
       local,
       maxPeople: MAX_PEOPLE,
       types: typesOf(data),
+      codes: codesOf(data),
+      customerListUrl: safeLink(env('VISITS_CUSTOMER_LIST_URL')),
       visits: data.visits,
     })
   }
@@ -90,7 +93,7 @@ export default async (request, context) => {
     const write = etag
       ? await store.setJSON(KEY, data, { onlyIfMatch: etag })
       : await store.setJSON(KEY, data, exists ? {} : { onlyIfNew: true })
-    if (write.modified) return json({ visits: data.visits, types: typesOf(data), ...result })
+    if (write.modified) return json({ visits: data.visits, types: typesOf(data), codes: codesOf(data), ...result })
   }
   return fail('Someone else changed the visits at the same time. Try again.', 409)
 }
@@ -109,7 +112,7 @@ function apply(data, body, me, canManage, team) {
   switch (body.action) {
     case 'create': {
       if (!canManage) throw error('Only organisers can add visits.', 400)
-      const fields = clean(body.visit, typesOf(data))
+      const fields = clean(body.visit, typesOf(data), codesOf(data).map((c) => c.code))
       const organiser = team.find((m) => m.id === body.visit?.organiser && m.organiser) || team.find((m) => m.organiser) || me
       const visit = {
         id: crypto.randomUUID(),
@@ -132,7 +135,7 @@ function apply(data, body, me, canManage, team) {
       const visit = find()
       if (visit.status === 'cancelled') throw error('That visit has been deleted.')
       // A visit can keep a type that has since been taken off the list.
-      const fields = clean(body.visit, [...typesOf(data), visit.kind])
+      const fields = clean(body.visit, [...typesOf(data), visit.kind], [...codesOf(data).map((c) => c.code), visit.code])
       const timeChanged = ['date', 'start', 'end'].some((k) => fields[k] !== visit[k])
       const placeChanged = fields.town !== visit.town || fields.code !== visit.code
       Object.assign(visit, fields)
@@ -207,7 +210,32 @@ function apply(data, body, me, canManage, team) {
       if (name !== from && types.some((t) => t.toLowerCase() === name.toLowerCase())) throw error('That type is already on the list.', 400, 'type')
       data.types = types.map((t) => (t === from ? name : t))
       for (const visit of data.visits) if (visit.kind === from) visit.kind = name
+      data.codes = codesOf(data).map((c) => (c.type === from ? { ...c, type: name } : c))
       return { type: name }
+    }
+    case 'add-code': {
+      if (!canManage) throw error('Only organisers can change customer codes.')
+      const codes = codesOf(data)
+      const code = String(body.code ?? '').trim().toUpperCase()
+      if (!/^[A-Z]{1,6}-\d{1,6}$/.test(code)) throw error('Enter a code like CH-014: letters, a hyphen, then numbers.', 400, 'newcode')
+      if (codes.some((c) => c.code === code)) throw error('That code is already on the list.', 400, 'newcode')
+      if (!typesOf(data).includes(body.type)) throw error('Choose a type from the list.', 400, 'codetype')
+      data.codes = [...codes, { code, type: body.type }].sort(byCode)
+      return { code }
+    }
+    case 'update-code': {
+      if (!canManage) throw error('Only organisers can change customer codes.')
+      const codes = codesOf(data)
+      if (!codes.some((c) => c.code === body.code)) throw error('That code no longer exists.', 410)
+      if (!typesOf(data).includes(body.type)) throw error('Choose a type from the list.', 400, 'codetype')
+      data.codes = codes.map((c) => (c.code === body.code ? { ...c, type: body.type } : c))
+      return { code: body.code }
+    }
+    case 'remove-code': {
+      if (!canManage) throw error('Only organisers can change customer codes.')
+      // Visits already using it keep it; it just can't be picked for new ones.
+      data.codes = codesOf(data).filter((c) => c.code !== body.code)
+      return {}
     }
     case 'remove-type': {
       if (!canManage) throw error('Only organisers can change visit types.')
@@ -222,7 +250,7 @@ function apply(data, body, me, canManage, team) {
   }
 }
 
-function clean(input = {}, types = DEFAULT_TYPES) {
+function clean(input = {}, types = DEFAULT_TYPES, codes = null) {
   const text = (value, max) => String(value ?? '').trim().slice(0, max)
   const visit = {
     code: text(input.code, 20).toUpperCase(),
@@ -236,6 +264,7 @@ function clean(input = {}, types = DEFAULT_TYPES) {
   // Each message names its field so the page can show it on that field.
   // Keep these in step with checkFields() in visits.html.
   if (!/^[A-Z]{1,6}-\d{1,6}$/.test(visit.code)) throw error('Use the customer’s code, like CH-014, not their name.', 400, 'code')
+  if (codes && !codes.includes(visit.code)) throw error('Pick a code from the list. If it’s a new customer, add the code in Customer codes first.', 400, 'code')
   if (!types.includes(visit.kind)) throw error('Choose a type from the list.', 400, 'kind')
   if (!visit.town) throw error('Find the area by postcode or town.', 400, 'town')
   if (!/^[A-Za-z][A-Za-z .'-]{0,39}( [A-Z]{1,2}\d[A-Z\d]?)?$/.test(visit.town)) {
@@ -289,6 +318,25 @@ function whoIs(session, team) {
 
 const publicTeam = (team) =>
   team.map(({ id, name, email, organiser, admin }) => ({ id, name, email: email || '', organiser: Boolean(organiser), admin: Boolean(admin) }))
+
+function codesOf(data) {
+  return Array.isArray(data.codes) ? data.codes : SEED_CODES
+}
+
+const byCode = (a, b) => {
+  const [pa, na] = a.code.split('-'), [pb, nb] = b.code.split('-')
+  return pa.localeCompare(pb) || Number(na) - Number(nb)
+}
+
+// Only Nourish SharePoint links, so the list link can't point anywhere else.
+function safeLink(value) {
+  try {
+    const url = new URL(value)
+    return url.protocol === 'https:' && /(^|\.)sharepoint\.com$/i.test(url.hostname) ? url.toString() : ''
+  } catch {
+    return ''
+  }
+}
 
 function typesOf(data) {
   return Array.isArray(data.types) && data.types.length ? data.types : DEFAULT_TYPES

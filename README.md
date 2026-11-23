@@ -80,6 +80,11 @@ adds, edits and deletes visits and is always going. Anyone else can opt in while
   "Town OUTCODE". A full postcode typed there is sent to postcodes.io but never stored.
 - **Sheets.** Adding or editing a visit and managing visit types open in a side sheet (bottom sheet
   on phones). Drill-ins replace the sheet's content with a Back button; sheets never stack.
+- **Customer codes.** The code field is a search-and-pick list of valid codes (codes and types only,
+  never names); picking one fills in Type. It starts from `netlify/lib/visit-codes.mjs` (97 codes
+  loaded 23 Nov 2026) and organisers manage it in Settings → Customer codes, which suggests the next
+  free code for a type. Visits can only use codes on the list. Names live in the Customer Codes List
+  (SharePoint), linked from the page when `VISITS_CUSTOMER_LIST_URL` is set.
 - **Visit types.** Organisers edit the list from the settings icon (Settings › Visit types) or the form's "Edit types". It's kept in Blobs with the
   visits. Renaming a type updates visits that use it; removing one leaves it on existing visits.
 - **Errors** show under the field they belong to (client check first, then the API's, which names
@@ -102,6 +107,8 @@ Environment variables (Netlify, all scopes):
 - `SITE_PASSWORD` — the shared team password
 - `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` — a GitHub OAuth app with callback
   `https://uxnourish.netlify.app/auth/github/callback` (optional `GITHUB_ORG`, default `nourishcare`)
+- `VISITS_CUSTOMER_LIST_URL` — SharePoint link to the Customer Codes List (optional; shown as a link
+  wherever the page mentions the list)
 - `VISITS_TEAM` — JSON list of `{ id, name, email, github, organiser?, admin? }`. It lives in
   Netlify, not in this public repo.
 
