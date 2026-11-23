@@ -26,7 +26,7 @@ import { getStore } from '@netlify/blobs'
 const MAX_PEOPLE = 2 // the organiser plus one other
 const KEY = 'visits'
 const SESSION_COOKIE = 'uxd_session'
-const DEFAULT_TYPES = ['Care home', 'Home care agency', 'Other'] // organisers can change the list on the page
+const DEFAULT_TYPES = ['Care home', 'Home care agency', 'Supported living', 'Mixed provider', 'Other'] // organisers can change the list on the page
 
 const env = (name) => Netlify.env.get(name) || ''
 const json = (body, status = 200) =>
