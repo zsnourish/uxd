@@ -60,6 +60,34 @@
     .view-switch { display: inline-flex; padding: 3px; gap: 2px; border-radius: 9px; background: var(--tint); box-shadow: var(--ring); margin-left: 6px; }
     .view-switch button { appearance: none; border: 0; background: none; font: inherit; font-size: 13px; font-weight: 600; color: var(--muted); padding: 5px 10px; border-radius: 7px; cursor: pointer; }
     .view-switch button[aria-pressed="true"] { background: var(--canvas); color: var(--sage-deep); box-shadow: 0 0 0 1px var(--tint-3); }
+    .people-row { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 0 0 12px; }
+    .person { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink); }
+    .person .role { color: var(--muted); }
+    .avatar { flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 700;
+      background: var(--tint-2); color: var(--sage-deep); }
+    .avatar.free { background: none; border: 1.5px dashed var(--tint-3); color: var(--muted); font-weight: 600; }
+    .person.free { color: var(--muted); }
+    .detail-rule { border: 0; border-top: 1px solid var(--line-soft); margin: 0 0 12px; }
+    .detail-links { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin-top: 10px; }
+    .detail-links .btn.link { padding-left: 0; padding-right: 0; margin-right: 14px; }
+    .detail-links .btn.link:hover { background: none; text-decoration: underline; }
+    .menu-wrap { position: relative; flex: none; }
+    .kebab { width: 34px; height: 34px; margin: 0; color: var(--muted); }
+    .kebab:hover, .kebab[aria-expanded="true"] { color: var(--ink); background: var(--tint); }
+    .row-menu { position: absolute; right: 0; top: calc(100% + 4px); z-index: 30; min-width: 200px; margin: 0; padding: 4px; list-style: none;
+      background: var(--canvas); border-radius: var(--radius); box-shadow: 0 0 0 1px var(--line), 0 12px 28px -12px rgb(20 38 29 / 0.25); }
+    .row-menu [role=menuitem] { display: block; width: 100%; padding: 8px 10px; border: 0; border-radius: 6px; background: none; font: inherit; font-size: 14px;
+      font-weight: 600; color: var(--ink); text-align: left; text-decoration: none; cursor: pointer; }
+    .row-menu [role=menuitem]:hover, .row-menu [role=menuitem]:focus-visible { background: var(--tint); box-shadow: none; }
+    .row-menu .danger-item { color: var(--bad); }
+    #status { position: sticky; top: 72px; z-index: 40; height: 0; }
+    .toast { position: absolute; left: 0; right: 0; margin: 0 auto; max-width: 560px; display: flex; gap: 10px; align-items: flex-start;
+      padding: 12px 14px; border-radius: var(--radius); background: var(--tint-2); color: var(--sage-deep); font-size: 14px; font-weight: 600;
+      box-shadow: 0 0 0 1px var(--tint-3), 0 12px 28px -14px rgb(20 38 29 / 0.35); transition: opacity 0.4s ease; }
+    .toast.bad { background: var(--bad-bg); color: var(--bad); box-shadow: 0 0 0 1px #f3c9c5, 0 12px 28px -14px rgb(20 38 29 / 0.35); }
+    .toast a { color: inherit; }
+    .toast .icon-btn { width: 24px; height: 24px; margin: -2px -4px 0 auto; color: inherit; }
+    .toast.fade { opacity: 0; }
     .auto-note { font-size: 13px; font-weight: 600; color: var(--sage-deep); }
     .label-row .label-extras { display: flex; align-items: center; gap: 10px; }
     .sheet-search { margin-bottom: 8px; }
@@ -186,7 +214,7 @@
   (() => {
     const SITE = location.origin
     const ME_KEY = 'uxd-visits-me'
-        const state = { team: [], visits: [], maxPeople: 2, viewer: null, local: false, open: new Set(), me: null, sheet: null, sheetOpener: null, confirming: null, flash: {}, formError: '', teamView: false, fieldErrors: {}, types: ['Care home', 'Home care agency', 'Supported living', 'Mixed provider', 'Other'], codes: [], customerListUrl: '', focusField: null }
+        const state = { team: [], visits: [], maxPeople: 2, viewer: null, local: false, open: new Set(), me: null, sheet: null, sheetOpener: null, confirming: null, flash: {}, formError: '', teamView: false, menu: null, fieldErrors: {}, types: ['Care home', 'Home care agency', 'Supported living', 'Mixed provider', 'Other'], codes: [], customerListUrl: '', focusField: null }
     const app = document.getElementById('app')
 
     // ── Local previews only: who to act as (live, it comes from the GitHub sign-in) ──
@@ -402,6 +430,10 @@
       return html
     }
 
+    const initials = (id) => member(id).name.split(/\s+/).map((w) => w[0]).slice(0, 2).join('').toUpperCase()
+    const personChip = (id, role) => '<span class="person"><span class="avatar" aria-hidden="true">' + esc(initials(id)) + '</span>' +
+      esc(state.me && id === state.me.id ? 'You' : member(id).name) + (role ? ' <span class="role">(' + role + ')</span>' : '') + '</span>'
+
     function card(v, past) {
       const d = noon(v.date)
       const opt = (o) => d.toLocaleDateString('en-GB', { ...o, timeZone: 'UTC' })
@@ -412,10 +444,6 @@
       const changed = changedForMe(v) && !past
       const flash = state.flash[v.id]
       const open = state.open.has(v.id) || changed || Boolean(flash) || state.confirming?.id === v.id
-
-      const names = people(v).map(first)
-      const going = names.length > 1 ? names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1] : names[0]
-      const meta = [esc(v.start) + ' to ' + esc(v.end), esc(v.kind), esc(going) + (!cancelled && !past && left ? ', ' + left + (left === 1 ? ' place' : ' places') + ' free' : '')]
 
       let alert = ''
       if (changed) {
@@ -430,19 +458,32 @@
       else if (left > 0 && state.me) side = '<button class="btn primary" data-do="join" data-id="' + id + '">Opt in</button>'
       else if (!left) side = '<span class="muted">Full</span>'
 
+      let menu = ''
+      if (canManage() && !cancelled && !past) {
+        const menuOpen = state.menu === v.id
+        const email = v.attendees.length ? mailto(v, v.attendees, 'changed') : ''
+        menu = '<div class="menu-wrap"><button type="button" class="icon-btn kebab" data-do="menu" data-id="' + id + '" aria-haspopup="menu" aria-expanded="' + menuOpen + '" aria-controls="m-' + id + '" aria-label="Actions for ' + esc(v.code) + '">' + ICON_MORE + '</button>' +
+          (menuOpen ? '<ul class="row-menu" role="menu" id="m-' + id + '" aria-label="Actions for ' + esc(v.code) + '">' +
+            '<li role="none"><button type="button" role="menuitem" data-do="edit" data-id="' + id + '">Edit visit</button></li>' +
+            (email ? '<li role="none"><a role="menuitem" href="' + esc(email) + '">Email ' + esc(v.attendees.map(first).join(' and ')) + '</a></li>' : '') +
+            '<li role="none"><button type="button" role="menuitem" class="danger-item" data-do="ask-delete" data-id="' + id + '">Delete visit</button></li></ul>' : '') +
+          '</div>'
+      }
+
       let html = '<article class="visit' + (open ? ' open' : '') + '">' +
         '<div class="visit-head"><button class="visit-toggle" data-do="toggle" data-id="' + id + '" aria-expanded="' + open + '" aria-controls="d-' + id + '">' +
         '<span class="visit-date">' + opt({ weekday: 'short' }) + '<span class="day">' + opt({ day: 'numeric' }) + '</span>' + opt({ month: 'short' }) + '</span>' +
-        '<span class="visit-main"><h3 class="visit-title">' + esc(v.code) + ' · ' + esc(v.town) + '</h3><p class="visit-meta">' + meta.join(' · ') + '</p>' + alert + '</span></button>' +
-        (side ? '<div class="visit-side">' + side + '</div>' : '') +
+        '<span class="visit-main"><h3 class="visit-title">' + esc(v.code) + ' · ' + esc(v.town) + '</h3><p class="visit-meta">' + esc(v.start) + ' to ' + esc(v.end) + ' · ' + esc(v.kind) + '</p>' + alert + '</span></button>' +
+        (side ? '<div class="visit-side">' + side + '</div>' : '') + menu +
         '<svg class="chev" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16"><path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'
 
       if (!open) return html + '</article>'
 
+      const free = !cancelled && !past && left
+        ? '<span class="person free"><span class="avatar free" aria-hidden="true">+</span>' + left + (left === 1 ? ' place free' : ' places free') + '</span>' : ''
       html += '<div class="visit-detail" id="d-' + id + '">' +
-        '<p><span class="label">When:</span> ' + fmtDate(v.date) + ', ' + esc(v.start) + ' to ' + esc(v.end) + '</p>' +
-        '<p><span class="label">Going:</span> ' + esc(member(v.organiser).name) + ' (organiser)' + v.attendees.map((a) => ', ' + esc(member(a).name)).join('') + '</p>' +
-        (v.purpose ? '<p class="purpose">' + esc(v.purpose) + '</p>' : '')
+        '<div class="people-row" aria-label="Who’s going">' + personChip(v.organiser, 'organiser') + v.attendees.map((a) => personChip(a)).join('') + free + '</div>' +
+        (v.purpose ? '<hr class="detail-rule"><p class="purpose">' + esc(v.purpose) + '</p>' : '')
 
       if (changed) {
         html += cancelled
@@ -451,33 +492,22 @@
       }
       if (flash) html += '<div class="notice ' + (flash.tone || '') + '">' + flash.html + '</div>'
       if (state.confirming?.id === v.id) html += confirmBox(v)
-      else if (!cancelled && !past) html += actions(v, mine, left, changed)
+      else html += detailLinks(v, changed, cancelled || past)
       return html + '</div></article>'
     }
 
-    function actions(v, mine, left, changed) {
-      if (!state.me) return ''
+    // Quiet links under the detail: the customer list, plus calendar and withdraw for people going.
+    function detailLinks(v, changed, closed) {
       const id = esc(v.id)
-      const me = state.me.id
+      const me = state.me?.id
       const out = []
-      if (v.attendees.includes(me)) {
-        if (!changed) {
-          out.push('<button class="btn" data-do="ics" data-id="' + id + '">Add to Outlook</button>')
-          out.push('<a class="btn link" href="' + outlookWebUrl(v) + '" target="_blank" rel="noopener">Outlook on the web</a>')
-        }
-        out.push('<button class="btn link danger-text" data-do="ask-withdraw" data-id="' + id + '">Withdraw</button>')
-      } else if (v.organiser === me) {
-        out.push('<button class="btn" data-do="ics" data-id="' + id + '">Add to Outlook</button>')
+      if (!closed && me && people(v).includes(me) && !changed) {
+        out.push('<button class="btn link" data-do="ics" data-id="' + id + '">Add to Outlook</button>')
+        out.push('<a class="btn link" href="' + outlookWebUrl(v) + '" target="_blank" rel="noopener">Outlook on the web</a>')
       }
-      if (canManage()) {
-        out.push('<button class="btn link" data-do="edit" data-id="' + id + '">Edit</button>')
-        out.push('<button class="btn link danger-text" data-do="ask-delete" data-id="' + id + '">Delete</button>')
-        if (v.attendees.length) {
-          const href = mailto(v, v.attendees, 'changed')
-          if (href) out.push('<a class="btn link" href="' + esc(href) + '">Email ' + esc(v.attendees.map(first).join(' and ')) + '</a>')
-        }
-      }
-      return out.length ? '<div class="actions">' + out.join('') + '</div>' : ''
+      if (!closed && me && v.attendees.includes(me)) out.push('<button class="btn link danger-text" data-do="ask-withdraw" data-id="' + id + '">Withdraw</button>')
+      if (state.customerListUrl) out.push('<a class="btn link" href="' + esc(state.customerListUrl) + '" target="_blank" rel="noopener">Customer Codes List ↗</a>')
+      return out.length ? '<div class="detail-links">' + out.join('') + '</div>' : ''
     }
 
     function confirmBox(v) {
@@ -509,6 +539,7 @@
     const ICON_X = '<svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 5l10 10M15 5 5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>'
     const ICON_BACK = '<svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 4.5 7 10l5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'
     const ICON_COG = '<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>'
+    const ICON_MORE = '<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="3.5" r="1.6" fill="currentColor"/><circle cx="9" cy="9" r="1.6" fill="currentColor"/><circle cx="9" cy="14.5" r="1.6" fill="currentColor"/></svg>'
     const ICON_NEXT = '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>'
 
     function sheetHtml() {
@@ -922,9 +953,9 @@
         const v = state.visits.find((x) => x.id === data.id)
         if (id && v && v.attendees.length) {
           const href = mailto(v, v.attendees, 'changed')
-          state.flash[id] = { tone: 'ok', html: 'Saved. ' + esc(v.attendees.map(first).join(' and ')) + ' will be asked to update their calendar here.' + (href ? ' <a href="' + esc(href) + '">Email them about the change</a>.' : '') }
+          toast('Saved. ' + esc(v.attendees.map(first).join(' and ')) + ' will be asked to update their calendar here.' + (href ? ' <a href="' + esc(href) + '">Email them about the change</a>' : ''))
         } else if (v) {
-          state.flash[v.id] = { tone: 'ok', html: id ? 'Saved.' : 'Visit added. The team can now opt in.' }
+          toast(id ? 'Visit saved' : 'Visit added. The team can now opt in.')
         }
       })
     })
@@ -944,7 +975,7 @@
           writeMe(chosen); state.me = member(chosen); return render()
         }
         case 'add': return openSheet({ view: 'visit' }, '[data-do="add"]')
-        case 'edit': return openSheet({ view: 'visit', visitId: id }, '[data-do="edit"][data-id="' + id + '"]')
+        case 'edit': state.menu = null; return openSheet({ view: 'visit', visitId: id }, '[data-do="menu"][data-id="' + id + '"]')
         case 'close-sheet': return closeSheet()
         case 'sheet-back': return sheetBack()
         case 'open-types':
@@ -979,11 +1010,14 @@
             if (state.draft?.kind === removed) state.draft.kind = state.types[0]
           })
         }
+        case 'menu':
+          state.menu = state.menu === id ? null : id; render()
+          return state.menu ? document.querySelector('#m-' + CSS.escape(id) + ' [role=menuitem]')?.focus() : document.querySelector('[data-do="menu"][data-id="' + id + '"]')?.focus()
         case 'toggle':
           if (state.open.has(id)) state.open.delete(id); else state.open.add(id)
           return render()
         case 'ask-withdraw': state.confirming = { id, kind: 'withdraw' }; return render()
-        case 'ask-delete': state.confirming = { id, kind: 'delete' }; return render()
+        case 'ask-delete': state.menu = null; state.open.add(id); state.confirming = { id, kind: 'delete' }; render(); return document.querySelector('.confirm [data-do="cancel-confirm"]')?.focus()
         case 'cancel-confirm': state.confirming = null; return render()
         case 'ics': return download(v, false)
         case 'ics-update': download(v, false); return act({ action: 'seen', id }, el)
@@ -992,14 +1026,14 @@
         case 'join':
           state.open.add(id)
           return act({ action: 'join', id }, el, () => {
-            state.flash[id] = { tone: 'ok', html: '<strong>You’re going.</strong> Add it to your Outlook calendar with the button below. If ' + esc(first(v.organiser)) + ' changes or cancels the visit, you’ll see it here.' }
+            toast('You’re going. Add it to your calendar from the visit. If ' + esc(first(v.organiser)) + ' changes or cancels it, you’ll see it here.')
           })
         case 'withdraw': {
           const snapshot = { ...v }
           state.confirming = null
           return act({ action: 'withdraw', id }, el, () => {
             download(snapshot, true)
-            state.flash[id] = { tone: 'ok', html: 'You’ve withdrawn. A cancellation file has downloaded so you can take it out of your calendar.' }
+            toast('You’ve withdrawn. A cancellation file has downloaded so you can take it out of your calendar.')
           })
         }
         case 'delete': {
@@ -1007,7 +1041,7 @@
           state.confirming = null
           return act({ action: 'delete', id }, el, () => {
             const href = snapshot.attendees.length ? mailto(snapshot, snapshot.attendees, 'cancelled') : ''
-            showStatus('Visit to ' + esc(label(snapshot)) + ' deleted.' + (href ? ' <a href="' + esc(href) + '">Email ' + esc(snapshot.attendees.map(first).join(' and ')) + ' about it</a>.' : ''))
+            toast('Visit to ' + esc(label(snapshot)) + ' deleted.' + (href ? ' <a href="' + esc(href) + '">Email ' + esc(snapshot.attendees.map(first).join(' and ')) + ' about it</a>' : ''))
           })
         }
       }
@@ -1047,6 +1081,35 @@
         state.sheet = { ...s, view: 'types', type: undefined, typeDraft: undefined }
         state.fieldErrors = {}
       })
+    }
+
+    // Row ⋮ menu: closes on outside click or Escape; arrow keys move between items.
+    document.addEventListener('click', (e) => {
+      if (state.menu && !e.target.closest('.menu-wrap')) { state.menu = null; render() }
+    })
+    document.addEventListener('keydown', (e) => {
+      if (!state.menu || state.sheet) return
+      const items = [...document.querySelectorAll('.row-menu [role=menuitem]')]
+      const i = items.indexOf(document.activeElement)
+      if (e.key === 'Escape') { e.preventDefault(); const id = state.menu; state.menu = null; render(); document.querySelector('[data-do="menu"][data-id="' + id + '"]')?.focus() }
+      else if (e.key === 'ArrowDown') { e.preventDefault(); items[(i + 1) % items.length]?.focus() }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); items[(i - 1 + items.length) % items.length]?.focus() }
+      else if (e.key === 'Tab') { state.menu = null; setTimeout(render, 0) }
+    })
+
+    // Toast in the content area: 8 seconds, then fades. Hovering or focusing it keeps it.
+    let toastTimer = null
+    function toast(html, tone = '') {
+      const el = document.getElementById('status')
+      clearTimeout(toastTimer)
+      el.innerHTML = '<div class="toast ' + tone + '"><span>' + html + '</span><button type="button" class="icon-btn" data-toast-close aria-label="Dismiss">' + ICON_X + '</button></div>'
+      const t = el.firstChild
+      const hide = () => { t.classList.add('fade'); setTimeout(() => t.remove(), 400) }
+      const arm = () => { clearTimeout(toastTimer); toastTimer = setTimeout(hide, 8000) }
+      t.addEventListener('mouseenter', () => clearTimeout(toastTimer)); t.addEventListener('mouseleave', arm)
+      t.addEventListener('focusin', () => clearTimeout(toastTimer)); t.addEventListener('focusout', arm)
+      t.querySelector('[data-toast-close]').addEventListener('click', hide)
+      arm()
     }
 
     function showStatus(html) {
