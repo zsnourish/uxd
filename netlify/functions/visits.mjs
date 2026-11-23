@@ -66,6 +66,8 @@ export default async (request, context) => {
       types: typesOf(data),
       codes: codesOf(data),
       customerListUrl: safeLink(env('VISITS_CUSTOMER_LIST_URL')),
+      // Internal name of the list's code column (List settings → the column → Field= in the address), for filtered links.
+      customerCodeField: /^[A-Za-z0-9_]{1,64}$/.test(env('VISITS_CUSTOMER_LIST_CODE_FIELD')) ? env('VISITS_CUSTOMER_LIST_CODE_FIELD') : '',
       visits: data.visits,
     })
   }
@@ -113,32 +115,49 @@ function apply(data, body, me, canManage, team) {
     case 'create': {
       if (!canManage) throw error('Only organisers can add visits.', 400)
       const fields = clean(body.visit, typesOf(data), codesOf(data).map((c) => c.code))
-      const organiser = team.find((m) => m.id === body.visit?.organiser && m.organiser) || team.find((m) => m.organiser) || me
+      const { organiser, attendees } = pickPeople(body.visit, team, me)
       const visit = {
         id: crypto.randomUUID(),
         ...fields,
-        organiser: organiser.id,
-        attendees: [],
+        organiser,
+        attendees,
         sequence: 0,
         status: 'scheduled',
-        seen: {},
+        seen: Object.fromEntries(attendees.map((id) => [id, 0])),
+        notices: {},
         createdAt: now,
         createdBy: me.id,
         updatedAt: now,
         updatedBy: me.id,
       }
+      // People put on the visit by someone else are told on the page.
+      for (const id of [organiser, ...attendees]) if (id !== me.id) visit.notices[id] = { type: 'added', by: me.id, at: now }
       data.visits.push(visit)
       return { id: visit.id }
     }
     case 'update': {
-      if (!canManage) throw error('Only organisers can edit visits.', 400)
       const visit = find()
+      if (!canManage && visit.organiser !== me.id) throw error('Only this visit’s organiser can edit it.', 400)
       if (visit.status === 'cancelled') throw error('That visit has been deleted.')
       // A visit can keep a type that has since been taken off the list.
       const fields = clean(body.visit, [...typesOf(data), visit.kind], [...codesOf(data).map((c) => c.code), visit.code])
       const timeChanged = ['date', 'start', 'end'].some((k) => fields[k] !== visit[k])
       const placeChanged = fields.town !== visit.town || fields.code !== visit.code
+      const before = [visit.organiser, ...visit.attendees]
+      const next = body.visit && 'organiser' in body.visit ? pickPeople(body.visit, team, me) : { organiser: visit.organiser, attendees: visit.attendees }
       Object.assign(visit, fields)
+      visit.organiser = next.organiser
+      visit.attendees = next.attendees
+      visit.notices = visit.notices || {}
+      const after = [next.organiser, ...next.attendees]
+      for (const id of before) if (!after.includes(id) && id !== me.id) visit.notices[id] = { type: 'removed', by: me.id, at: now }
+      for (const id of after) {
+        if (!before.includes(id)) {
+          visit.seen[id] = visit.sequence + 1
+          if (id !== me.id) visit.notices[id] = { type: 'added', by: me.id, at: now }
+        }
+      }
+      for (const id of before) if (!after.includes(id)) delete visit.seen[id]
       visit.sequence += 1
       visit.updatedAt = now
       visit.updatedBy = me.id
@@ -146,9 +165,9 @@ function apply(data, body, me, canManage, team) {
       return { id: visit.id }
     }
     case 'delete': {
-      if (!canManage) throw error('Only organisers can delete visits.', 400)
       const visit = find()
-      if (visit.attendees.length) {
+      if (!canManage && visit.organiser !== me.id) throw error('Only this visit’s organiser can delete it.', 400)
+      if (visit.attendees.some((id) => id !== me.id)) {
         // Keep it as cancelled so the people who opted in see the cancellation
         // and can take it out of their calendar.
         visit.status = 'cancelled'
@@ -169,6 +188,7 @@ function apply(data, body, me, canManage, team) {
       if (people(visit).length >= MAX_PEOPLE) throw error('That visit is full. Someone else opted in first.', 409)
       visit.attendees.push(me.id)
       visit.seen[me.id] = visit.sequence
+      if (visit.notices) delete visit.notices[me.id]
       visit.joinedAt = { ...(visit.joinedAt || {}), [me.id]: now }
       return { id: visit.id }
     }
@@ -187,9 +207,16 @@ function apply(data, body, me, canManage, team) {
       const visit = find()
       if (!visit.attendees.includes(me.id)) throw error('You’re not on this visit.')
       visit.seen[me.id] = visit.sequence
+      if (visit.notices) delete visit.notices[me.id]
       if (visit.status === 'cancelled' && visit.attendees.every((id) => visit.seen[id] >= visit.sequence)) {
         data.visits = data.visits.filter((v) => v.id !== visit.id)
       }
+      return { id: visit.id }
+    }
+    case 'dismiss-notice': {
+      // "Got it" on an added/removed notice.
+      const visit = find()
+      if (visit.notices) delete visit.notices[me.id]
       return { id: visit.id }
     }
     case 'add-type': {
@@ -248,6 +275,17 @@ function apply(data, body, me, canManage, team) {
     default:
       throw error('Unknown action.')
   }
+}
+
+// Who's on a visit. The organiser defaults to whoever adds it. Caitlin (the team's
+// organiser) is added as the other person by default when someone else organises;
+// the form can change that person or leave the place free.
+function pickPeople(input = {}, team, me) {
+  const ids = new Set(team.map((m) => m.id))
+  const organiser = ids.has(input.organiser) ? input.organiser : me.id
+  const also = input.alsoGoing === '' ? null : ids.has(input.alsoGoing) ? input.alsoGoing : null
+  if (also && also === organiser) throw error('Choose someone other than the organiser.', 400, 'alsoGoing')
+  return { organiser, attendees: also ? [also] : [] }
 }
 
 function clean(input = {}, types = DEFAULT_TYPES, codes = null) {

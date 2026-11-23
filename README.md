@@ -85,6 +85,10 @@ adds, edits and deletes visits and is always going. Anyone else can opt in while
   loaded 23 Nov 2026) and organisers manage it in Settings → Customer codes, which suggests the next
   free code for a type. Visits can only use codes on the list. Names live in the Customer Codes List
   (SharePoint), linked from the page when `VISITS_CUSTOMER_LIST_URL` is set.
+- **Who's going.** Each visit has an organiser (defaults to whoever adds it) and one other person
+  (Caitlin by default; can be someone else or left free for the team to opt in). A visit's organiser
+  can edit, reschedule and cancel it whatever their role. People added or taken off by someone else
+  see a notice on the page with the matching calendar file.
 - **Visit types.** Organisers edit the list from the settings icon (Settings › Visit types) or the form's "Edit types". It's kept in Blobs with the
   visits. Renaming a type updates visits that use it; removing one leaves it on existing visits.
 - **Errors** show under the field they belong to (client check first, then the API's, which names
@@ -109,6 +113,9 @@ Environment variables (Netlify, all scopes):
   `https://uxnourish.netlify.app/auth/github/callback` (optional `GITHUB_ORG`, default `nourishcare`)
 - `VISITS_CUSTOMER_LIST_URL` — SharePoint link to the Customer Codes List (optional; shown as a link
   wherever the page mentions the list)
+- `VISITS_CUSTOMER_LIST_CODE_FIELD` — internal name of the list's code column (List settings → click the
+  column → the `Field=` value in the address). When set, "Who is CH-001?" opens the list filtered to
+  that code; otherwise it opens the list and copies the code for its search box.
 - `VISITS_TEAM` — JSON list of `{ id, name, email, github, organiser?, admin? }`. It lives in
   Netlify, not in this public repo.
 

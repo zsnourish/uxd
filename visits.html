@@ -214,7 +214,7 @@
   (() => {
     const SITE = location.origin
     const ME_KEY = 'uxd-visits-me'
-        const state = { team: [], visits: [], maxPeople: 2, viewer: null, local: false, open: new Set(), me: null, sheet: null, sheetOpener: null, confirming: null, flash: {}, formError: '', teamView: false, menu: null, fieldErrors: {}, types: ['Care home', 'Home care agency', 'Supported living', 'Mixed provider', 'Other'], codes: [], customerListUrl: '', focusField: null }
+        const state = { team: [], visits: [], maxPeople: 2, viewer: null, local: false, open: new Set(), me: null, sheet: null, sheetOpener: null, confirming: null, flash: {}, formError: '', teamView: false, menu: null, fieldErrors: {}, types: ['Care home', 'Home care agency', 'Supported living', 'Mixed provider', 'Other'], codes: [], customerListUrl: '', customerCodeField: '', focusField: null }
     const app = document.getElementById('app')
 
     // ── Local previews only: who to act as (live, it comes from the GitHub sign-in) ──
@@ -237,6 +237,10 @@
     const isOrganiserish = () => Boolean(state.me && (state.me.organiser || state.me.admin))
     const canManage = () => isOrganiserish() && !state.teamView
     state.teamView = readTeamView()
+    // A visit's own organiser can edit, reschedule and cancel it, whatever their role.
+    const canEdit = (v) => canManage() || Boolean(state.me && v.organiser === state.me.id)
+    const defaultPerson = () => state.team.find((m) => m.organiser)?.id || ''
+    const noticeFor = (v) => (state.me && v.notices?.[state.me.id]) || null
     const isMine = (v) => state.me && people(v).includes(state.me.id)
     const changedForMe = (v) => state.me && v.attendees.includes(state.me.id) && (v.seen?.[state.me.id] ?? -1) < v.sequence
     const placesLeft = (v) => Math.max(0, state.maxPeople - people(v).length)
@@ -264,6 +268,7 @@
         state.types = data.types || state.types
         state.codes = data.codes || state.codes
         state.customerListUrl = data.customerListUrl || ''
+        state.customerCodeField = data.customerCodeField || ''
         state.visits = data.visits
         state.viewer = data.viewer
         state.local = Boolean(data.local)
@@ -373,7 +378,7 @@
     function render() {
       if (state.local && !state.me) return renderPicker()
       const t = today()
-      const live = state.visits.filter((v) => v.status !== 'cancelled' || (state.me && v.attendees.includes(state.me.id)))
+      const live = state.visits.filter((v) => (v.status !== 'cancelled' || (state.me && v.attendees.includes(state.me.id))) || noticeFor(v))
       const upcoming = live.filter((v) => v.date >= t).sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start))
       const past = live.filter((v) => v.date < t && v.status !== 'cancelled').sort((a, b) => (b.date + b.start).localeCompare(a.date + a.start))
 
@@ -443,10 +448,15 @@
       const id = esc(v.id)
       const changed = changedForMe(v) && !past
       const flash = state.flash[v.id]
-      const open = state.open.has(v.id) || changed || Boolean(flash) || state.confirming?.id === v.id
+      const notice = !past ? noticeFor(v) : null
+      const open = state.open.has(v.id) || changed || Boolean(notice) || Boolean(flash) || state.confirming?.id === v.id
 
       let alert = ''
-      if (changed) {
+      if (notice) {
+        alert = '<p class="visit-alert' + (notice.type === 'removed' ? ' bad' : '') + '">' + esc(first(notice.by)) +
+          (notice.type === 'removed' ? ' took you off this visit. Remove it from your calendar.' : ' added you to this visit. Add it to your calendar.') + '</p>'
+      }
+      if (changed && !notice) {
         const what = cancelled ? 'cancelled this visit' : v.lastChange === 'rescheduled' ? 'rescheduled this visit' : v.lastChange === 'moved' ? 'changed where this visit is' : 'updated this visit'
         alert = '<p class="visit-alert' + (cancelled ? ' bad' : '') + '">' + esc(first(v.updatedBy)) + ' ' + what + '. ' + (cancelled ? 'Remove it from your calendar.' : 'Update your calendar.') + '</p>'
       }
@@ -459,7 +469,7 @@
       else if (!left) side = '<span class="muted">Full</span>'
 
       let menu = ''
-      if (canManage() && !cancelled && !past) {
+      if (canEdit(v) && !cancelled && !past) {
         const menuOpen = state.menu === v.id
         const email = v.attendees.length ? mailto(v, v.attendees, 'changed') : ''
         menu = '<div class="menu-wrap"><button type="button" class="icon-btn kebab" data-do="menu" data-id="' + id + '" aria-haspopup="menu" aria-expanded="' + menuOpen + '" aria-controls="m-' + id + '" aria-label="Actions for ' + esc(v.code) + '">' + ICON_MORE + '</button>' +
@@ -485,16 +495,33 @@
         '<div class="people-row" aria-label="Who’s going">' + personChip(v.organiser, 'organiser') + v.attendees.map((a) => personChip(a)).join('') + free + '</div>' +
         (v.purpose ? '<hr class="detail-rule"><p class="purpose">' + esc(v.purpose) + '</p>' : '')
 
-      if (changed) {
+      if (notice) {
+        html += notice.type === 'removed'
+          ? '<div class="actions"><button class="btn" data-do="ics-removed" data-id="' + id + '">Download the cancellation</button><button class="btn link" data-do="dismiss-notice" data-id="' + id + '">Done</button></div>'
+          : '<div class="actions"><button class="btn" data-do="ics-added" data-id="' + id + '">Add to Outlook</button><button class="btn link" data-do="dismiss-notice" data-id="' + id + '">Got it</button></div>'
+      } else if (changed) {
         html += cancelled
           ? '<div class="actions"><button class="btn" data-do="ics-cancel" data-id="' + id + '">Download the cancellation</button><button class="btn link" data-do="seen" data-id="' + id + '">I’ve removed it</button></div>'
           : '<div class="actions"><button class="btn" data-do="ics-update" data-id="' + id + '">Download the update</button><button class="btn link" data-do="seen" data-id="' + id + '">I’ve updated it</button></div>'
       }
       if (flash) html += '<div class="notice ' + (flash.tone || '') + '">' + flash.html + '</div>'
       if (state.confirming?.id === v.id) html += confirmBox(v)
-      else html += detailLinks(v, changed, cancelled || past)
+      else html += detailLinks(v, changed || Boolean(notice), cancelled || past || notice?.type === 'removed')
       return html + '</div></article>'
     }
+
+    // "Who is CH-001?": the Customer Codes List filtered to the code when the column's
+    // internal name is set; otherwise the list opens and the code is copied for its search box.
+    function whoUrl(code) {
+      if (!state.customerCodeField) return state.customerListUrl
+      return state.customerListUrl + (state.customerListUrl.includes('?') ? '&' : '?') + 'FilterField1=' + encodeURIComponent(state.customerCodeField) + '&FilterValue1=' + encodeURIComponent(code)
+    }
+    app.addEventListener('click', (e) => {
+      const a = e.target.closest('[data-who]')
+      if (!a || state.customerCodeField) return
+      try { navigator.clipboard?.writeText(a.dataset.who) } catch {}
+      toast(esc(a.dataset.who) + ' copied. Paste it into the list’s search to find the customer.')
+    })
 
     // Quiet links under the detail: the customer list, plus calendar and withdraw for people going.
     function detailLinks(v, changed, closed) {
@@ -506,7 +533,7 @@
         out.push('<a class="btn link" href="' + outlookWebUrl(v) + '" target="_blank" rel="noopener">Outlook on the web</a>')
       }
       if (!closed && me && v.attendees.includes(me)) out.push('<button class="btn link danger-text" data-do="ask-withdraw" data-id="' + id + '">Withdraw</button>')
-      if (state.customerListUrl) out.push('<a class="btn link" href="' + esc(state.customerListUrl) + '" target="_blank" rel="noopener">Customer Codes List ↗</a>')
+      if (state.customerListUrl) out.push('<a class="btn link" href="' + esc(whoUrl(v.code)) + '" target="_blank" rel="noopener" data-who="' + esc(v.code) + '">Who is ' + esc(v.code) + '? ↗</a>')
       return out.length ? '<div class="detail-links">' + out.join('') + '</div>' : ''
     }
 
@@ -574,11 +601,12 @@
       return {
         formId: 'visit-form',
         title: v ? 'Edit visit' : 'Add a visit',
-        caption: v ? esc(v.code + ' · ' + v.town) : esc(organiser) + ' is the organiser and is going by default.',
+        caption: v ? esc(v.code + ' · ' + v.town) : esc(member(defaultPerson()).name) + ' goes on every visit unless you change who’s going.',
         body: '<div class="form-grid">' +
           field('code', 'Customer code', 'The code you use in place of this customer’s name. Find it in the ' + listLink() + '. Never type the name itself.',
             '<div class="combo"><CTRL<input id="f-code" name="code" maxlength="20" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="f-code-list" placeholder="Start typing, for example CH-0" value="' + val('code') + '">' +
             '<ul class="combo-list" id="f-code-list" role="listbox" aria-label="Matching codes" hidden></ul></div>', { extra: manageCodes }) +
+          peopleFields(src, v) +
           field('kind', 'Type', '', '<CTRL<select id="f-kind" name="kind">' + kinds.map((k) => '<option' + (kind === k ? ' selected' : '') + '>' + esc(k) + '</option>').join('') + '</select>', { extra: editTypes }) +
           field('town', 'Area', 'Type a postcode or town, then pick from the list. Only the town and first part of the postcode are saved.',
             '<div class="combo"><CTRL<input id="f-town" name="town" maxlength="60" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="f-town-list" placeholder="LS1 4AP or Leeds" value="' + val('town') + '">' +
@@ -597,6 +625,17 @@
     }
 
     // Organiser settings: customer codes and visit types; more can join this list.
+    // Organiser defaults to whoever adds the visit; Caitlin is the other person by default.
+    function peopleFields(src, v) {
+      const me = state.me.id, caitlin = defaultPerson()
+      const organiser = src?.organiser ?? v?.organiser ?? me
+      const also = src && 'alsoGoing' in src ? src.alsoGoing : v ? (v.attendees[0] || '') : (organiser === caitlin ? '' : caitlin)
+      const opts = (sel, list) => list.map((m) => '<option value="' + esc(m.id) + '"' + (m.id === sel ? ' selected' : '') + '>' + esc(m.id === me ? m.name + ' (you)' : m.name) + '</option>').join('')
+      return field('organiser', 'Organiser', 'They can edit, reschedule and cancel this visit.', '<CTRL<select id="f-organiser" name="organiser">' + opts(organiser, state.team) + '</select>') +
+        field('alsoGoing', 'Also going', esc(member(caitlin).name) + ' goes by default. Choose someone else, or leave the place free for the team.',
+          '<CTRL<select id="f-alsoGoing" name="alsoGoing"><option value=""' + (!also ? ' selected' : '') + '>No one yet: place free</option>' + opts(also, state.team.filter((m) => m.id !== organiser)) + '</select>')
+    }
+
     function settingsView() {
       const n = state.types.length
       return {
@@ -780,7 +819,7 @@
       const el = document.getElementById('visit-form')
       if (!el) return null
       const f = new FormData(el)
-      return Object.fromEntries(['code', 'kind', 'town', 'date', 'start', 'end', 'purpose'].map((k) => [k, (f.get(k) || '').toString()]))
+      return Object.fromEntries(['code', 'organiser', 'alsoGoing', 'kind', 'town', 'date', 'start', 'end', 'purpose'].map((k) => [k, (f.get(k) || '').toString()]))
     }
 
     function focusPending() {
@@ -902,6 +941,14 @@
     app.addEventListener('focusin', (e) => {
       if (e.target.id === 'f-code' && !combos['f-code']) showCombo('f-code', matchCodes(e.target.value).filter((o) => !o.more), 'No code matches. Add it in Customer codes first.')
     })
+    // Changing the organiser keeps Also going valid: Caitlin by default, or a free place when she organises.
+    app.addEventListener('change', (e) => {
+      if (e.target.id !== 'f-organiser') return
+      state.draft = readForm()
+      const caitlin = defaultPerson()
+      if (state.draft.alsoGoing === state.draft.organiser) state.draft.alsoGoing = state.draft.organiser === caitlin ? '' : caitlin
+      render(); document.getElementById('f-organiser')?.focus()
+    })
     // In New code, switching the type updates the suggested code unless it was edited.
     app.addEventListener('change', (e) => {
       if (e.target.id !== 'f-codetype') return
@@ -955,7 +1002,7 @@
           const href = mailto(v, v.attendees, 'changed')
           toast('Saved. ' + esc(v.attendees.map(first).join(' and ')) + ' will be asked to update their calendar here.' + (href ? ' <a href="' + esc(href) + '">Email them about the change</a>' : ''))
         } else if (v) {
-          toast(id ? 'Visit saved' : 'Visit added. The team can now opt in.')
+          toast(id ? 'Visit saved' : placesLeft(v) ? 'Visit added. The team can now opt in.' : 'Visit added with ' + esc(people(v).filter((p) => p !== state.me.id).map(first).join(' and ') || 'you') + '. It’s full.')
         }
       })
     })
@@ -1023,6 +1070,9 @@
         case 'ics-update': download(v, false); return act({ action: 'seen', id }, el)
         case 'ics-cancel': download(v, true); return act({ action: 'seen', id }, el)
         case 'seen': return act({ action: 'seen', id }, el)
+        case 'dismiss-notice': return act({ action: 'dismiss-notice', id }, el)
+        case 'ics-added': download(v, false); return act({ action: 'dismiss-notice', id }, el)
+        case 'ics-removed': download(v, true); return act({ action: 'dismiss-notice', id }, el)
         case 'join':
           state.open.add(id)
           return act({ action: 'join', id }, el, () => {
