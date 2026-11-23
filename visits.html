@@ -74,6 +74,8 @@
     .icon-btn { appearance: none; border: 0; background: none; flex: none; width: 36px; height: 36px; margin: -4px -6px 0; border-radius: var(--radius);
       display: grid; place-items: center; color: var(--ink); cursor: pointer; }
     .icon-btn:hover { background: var(--tint); }
+    .settings-btn { margin: 0; width: 38px; height: 38px; color: var(--muted); }
+    .settings-btn:hover { color: var(--ink); }
     .sheet-form { flex: 1; min-height: 0; display: flex; flex-direction: column; }
     .sheet-body { flex: 1; min-height: 0; overflow: auto; padding: 20px; }
     .sheet-body .form-grid { grid-template-columns: 1fr; gap: 22px; }
@@ -366,7 +368,7 @@
         note = '<div class="notice" style="margin:0 0 20px">You can see visits with the team password. To opt in, <a href="/auth/signout?next=/visits">sign out</a> and sign in with GitHub.</div>'
       }
       return '<div class="toolbar"><div class="whoami">' + who + '</div>' +
-        (canManage() ? '<div class="actions" style="margin:0"><button class="btn" data-do="open-types">Visit types</button><button class="btn primary" data-do="add">Add a visit</button></div>' : '') + '</div>' + note
+        (canManage() ? '<div class="actions" style="margin:0"><button class="icon-btn settings-btn" data-do="open-settings" aria-label="Site visit settings" title="Settings">' + ICON_COG + '</button><button class="btn primary" data-do="add">Add a visit</button></div>' : '') + '</div>' + note
     }
 
     function grouped(list) {
@@ -485,12 +487,14 @@
     // drilling in (visit form → types → one type) replaces the content, with Back.
     const ICON_X = '<svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 5l10 10M15 5 5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>'
     const ICON_BACK = '<svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 4.5 7 10l5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+    const ICON_COG = '<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>'
     const ICON_NEXT = '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>'
 
     function sheetHtml() {
       const s = state.sheet
       if (!s) return ''
       const view = s.view === 'visit' ? visitView(s.visitId ? state.visits.find((v) => v.id === s.visitId) : null)
+        : s.view === 'settings' ? settingsView()
         : s.view === 'types' ? typesView() : typeView()
       return '<div class="scrim"></div>' +
         '<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">' +
@@ -534,6 +538,18 @@
       }
     }
 
+    // Organiser settings. Visit types is the only one for now; more can join this list.
+    function settingsView() {
+      const n = state.types.length
+      return {
+        formId: 'settings-form',
+        title: 'Settings',
+        caption: 'Site visit settings for organisers.',
+        body: '<ul class="sheet-list"><li><button type="button" class="sheet-row" data-do="open-types"><span>Visit types<small>' + n + (n === 1 ? ' type' : ' types') + ' people can pick when adding a visit</small></span>' + ICON_NEXT + '</button></li></ul>',
+        footer: '<button type="button" class="btn" data-do="close-sheet">Close</button>',
+      }
+    }
+
     function typesView() {
       const t = today()
       const rows = state.types.map((type) => {
@@ -543,7 +559,7 @@
       }).join('')
       return {
         formId: 'types-form',
-        back: state.sheet.from === 'visit' ? 'Back to the visit' : '',
+        back: state.sheet.from === 'visit' ? 'Back to the visit' : state.sheet.from === 'settings' ? 'Back to settings' : '',
         title: 'Visit types',
         caption: 'The types people can pick when adding a visit. Choose one to rename or remove it.',
         body: '<ul class="sheet-list">' + rows + '</ul>' + (state.formError ? '<p class="form-error" role="alert">' + esc(state.formError) + '</p>' : ''),
@@ -598,6 +614,7 @@
       const s = state.sheet
       if (s.view === 'type') openSheet({ ...s, view: 'types', type: undefined, typeDraft: undefined, confirmRemove: false })
       else if (s.view === 'types' && s.from === 'visit') openSheet({ view: 'visit', visitId: s.visitId })
+      else if (s.view === 'types' && s.from === 'settings') openSheet({ view: 'settings' })
       else closeSheet()
     }
     // Keep keyboard focus inside the sheet; Escape works like the Close button.
@@ -792,7 +809,8 @@
         case 'sheet-back': return sheetBack()
         case 'open-types':
           if (state.sheet?.view === 'visit') { state.draft = readForm(); return openSheet({ view: 'types', from: 'visit', visitId: state.sheet.visitId }) }
-          return openSheet({ view: 'types' }, '[data-do="open-types"]')
+          return openSheet({ view: 'types', from: 'settings' })
+        case 'open-settings': return openSheet({ view: 'settings' }, '[data-do="open-settings"]')
         case 'open-type': return openSheet({ ...state.sheet, view: 'type', type: el.dataset.type, typeDraft: undefined, confirmRemove: false })
         case 'new-type': return openSheet({ ...state.sheet, view: 'type', type: null, typeDraft: undefined, confirmRemove: false })
         case 'ask-remove-type': state.sheet.confirmRemove = true; state.sheet.typeDraft = document.getElementById('f-type')?.value; render(); return document.querySelector('.sheet [data-do="cancel-remove-type"]')?.focus()
