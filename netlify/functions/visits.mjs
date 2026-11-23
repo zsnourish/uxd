@@ -243,7 +243,7 @@ function apply(data, body, me, canManage, team) {
     case 'add-code': {
       if (!canManage) throw error('Only organisers can change customer codes.')
       const codes = codesOf(data)
-      const code = String(body.code ?? '').trim().toUpperCase()
+      const code = normalCode(body.code)
       if (!/^[A-Z]{1,6}-\d{1,6}$/.test(code)) throw error('Enter a code like CH-014: letters, a hyphen, then numbers.', 400, 'newcode')
       if (codes.some((c) => c.code === code)) throw error('That code is already on the list.', 400, 'newcode')
       if (!typesOf(data).includes(body.type)) throw error('Choose a type from the list.', 400, 'codetype')
@@ -291,7 +291,7 @@ function pickPeople(input = {}, team, me) {
 function clean(input = {}, types = DEFAULT_TYPES, codes = null) {
   const text = (value, max) => String(value ?? '').trim().slice(0, max)
   const visit = {
-    code: text(input.code, 20).toUpperCase(),
+    code: normalCode(input.code).slice(0, 20),
     kind: text(input.kind, 40),
     town: area(input.town),
     date: text(input.date, 10),
@@ -356,6 +356,11 @@ function whoIs(session, team) {
 
 const publicTeam = (team) =>
   team.map(({ id, name, email, organiser, admin }) => ({ id, name, email: email || '', organiser: Boolean(organiser), admin: Boolean(admin) }))
+
+// "hca – 018 " → "HCA-018": any dash becomes a hyphen, spaces go, letters are capitals.
+function normalCode(value) {
+  return String(value ?? '').replace(/[\u2010-\u2015\u2212\uFE58\uFE63\uFF0D]/g, '-').replace(/\s+/g, '').toUpperCase()
+}
 
 function codesOf(data) {
   return Array.isArray(data.codes) ? data.codes : SEED_CODES

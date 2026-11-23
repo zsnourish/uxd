@@ -536,7 +536,7 @@
     // internal name is set; otherwise the list opens and the code is copied for its search box.
     function whoUrl(code) {
       if (!state.customerCodeField) return state.customerListUrl
-      return state.customerListUrl + (state.customerListUrl.includes('?') ? '&' : '?') + 'FilterField1=' + encodeURIComponent(state.customerCodeField) + '&FilterValue1=' + encodeURIComponent(code)
+      return state.customerListUrl + (state.customerListUrl.includes('?') ? '&' : '?') + 'FilterField1=' + encodeURIComponent(state.customerCodeField) + '&FilterValue1=' + encodeURIComponent(normalCode(code))
     }
     app.addEventListener('click', (e) => {
       const a = e.target.closest('[data-who]')
@@ -681,6 +681,8 @@
         : 'Customer Codes List'
     }
 
+    // Same tidy-up as the server: any dash → hyphen, no spaces, capitals.
+    const normalCode = (value) => String(value ?? '').replace(/[\u2010-\u2015\u2212\uFE58\uFE63\uFF0D]/g, '-').replace(/\s+/g, '').toUpperCase()
     const prefixOf = (code) => code.split('-')[0]
     // Next free code for a type: its usual prefix (or the type's initials) and the next number.
     function nextCode(type) {
@@ -829,7 +831,7 @@
     // Same rules as clean() in the visits function, so most errors show before saving.
     function checkFields(visit) {
       const errors = {}
-      const code = visit.code.trim().toUpperCase()
+      const code = normalCode(visit.code)
       const editingCode = state.sheet?.visitId ? state.visits.find((v) => v.id === state.sheet.visitId)?.code : null
       if (!/^[A-Z]{1,6}-\d{1,6}$/.test(code)) errors.code = 'Use the customer’s code, like CH-014, not their name.'
       else if (code !== editingCode && !state.codes.some((c) => c.code === code)) errors.code = 'Pick a code from the list. If it’s a new customer, add the code in Customer codes first.'
@@ -929,7 +931,7 @@
       document.getElementById(id + '-opt-' + c.active)?.scrollIntoView({ block: 'nearest' })
     }
     function matchCodes(q) {
-      const term = q.trim().toLowerCase().replace(/\s+/g, '')
+      const term = normalCode(q).toLowerCase()
       const hits = state.codes.filter((c) => !term || c.code.toLowerCase().includes(term) || c.type.toLowerCase().includes(term))
       const items = hits.slice(0, 8).map((c) => ({ label: c.code, sub: c.type, value: c.code, type: c.type }))
       if (hits.length > 8) items.push({ label: '+ ' + (hits.length - 8) + ' more: keep typing', sub: '', more: true })
@@ -937,6 +939,12 @@
     }
     app.addEventListener('input', (e) => {
       const id = e.target.id
+      // Codes tidy as people type or paste: "hca – 018" becomes "HCA-018".
+      if (id === 'f-newcode' || id === 'f-code') {
+        const tidy = normalCode(e.target.value)
+        if (tidy !== e.target.value) e.target.value = tidy
+        if (id === 'f-newcode') return
+      }
       if (id === 'f-code') {
         const note = document.getElementById('kind-auto'); if (note) note.hidden = true
         const items = matchCodes(e.target.value).filter((o) => !o.more)
@@ -949,7 +957,6 @@
         document.getElementById('codes-count').textContent = term ? shown + ' of ' + state.codes.length + ' codes' : state.codes.length + ' codes'
         return
       }
-      if (id === 'f-newcode') return
       if (id !== 'f-town') return
       clearTimeout(lookupTimer)
       const q = e.target.value
@@ -1136,7 +1143,7 @@
           state.sheet = { ...s, view: 'codes', code: undefined, codeTypeDraft: undefined }
         })
       }
-      const code = formEl.querySelector('#f-newcode').value.trim().toUpperCase()
+      const code = normalCode(formEl.querySelector('#f-newcode').value)
       s.newCodeDraft = code
       if (!/^[A-Z]{1,6}-\d{1,6}$/.test(code)) { state.fieldErrors = { newcode: 'Enter a code like CH-014: letters, a hyphen, then numbers.' }; state.focusField = 'newcode'; render(); return focusPending() }
       act({ action: 'add-code', code, type }, formEl.querySelector('[type=submit]'), (data) => {
