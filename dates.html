@@ -38,10 +38,15 @@
 
   <main class="wrap">
 
-    <div class="legend">
-      <div class="legend-item"><span class="legend-swatch team"></span>Other UX/Design team events</div>
-      <div class="legend-item"><span class="legend-swatch org"></span>Nourish org events</div>
-      <div class="legend-item"><span class="legend-swatch external"></span>Non-Nourish events</div>
+    <div class="filters" role="group" aria-label="Filter events">
+      <div class="chips">
+      <span class="filters-label">Show</span>
+      <button type="button" class="chip team" data-cat="team" aria-pressed="false"><span class="chip-dot"></span><svg class="chip-tick" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>UX/Design team events</button>
+      <button type="button" class="chip org" data-cat="org" aria-pressed="false"><span class="chip-dot"></span><svg class="chip-tick" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Nourish org events</button>
+      <button type="button" class="chip external" data-cat="external" aria-pressed="false"><span class="chip-dot"></span><svg class="chip-tick" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Non-Nourish events</button>
+      <button type="button" class="chip-clear" hidden>Show all</button>
+      </div>
+      <button type="button" class="past-toggle" aria-expanded="false" aria-controls="past" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Past events</span></button>
     </div>
 
     <div id="content">
@@ -57,6 +62,34 @@
       'Nourish org events': 'category-org',
       'Non-Nourish events': 'category-external'
     };
+    const catKey = item => (CATEGORY_CLASS[item.category] || 'category-team').replace('category-', '');
+
+    // Filter chips: none selected shows everything; selecting narrows to those types.
+    let allEvents = null;
+    const picked = new Set();
+    document.querySelectorAll('.chip[data-cat]').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const c = chip.dataset.cat;
+        picked.has(c) ? picked.delete(c) : picked.add(c);
+        syncChips();
+        if (allEvents) render(allEvents);
+      });
+    });
+    document.querySelector('.chip-clear').addEventListener('click', () => {
+      picked.clear(); syncChips(); if (allEvents) render(allEvents);
+      document.querySelector('.chip[data-cat]').focus();
+    });
+    let showPast = false;
+    document.querySelector('.past-toggle').addEventListener('click', e => {
+      showPast = !showPast;
+      e.currentTarget.setAttribute('aria-expanded', String(showPast));
+      if (allEvents) render(allEvents);
+      if (showPast) document.getElementById('past')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    function syncChips() {
+      document.querySelectorAll('.chip[data-cat]').forEach(ch => ch.setAttribute('aria-pressed', String(picked.has(ch.dataset.cat))));
+      document.querySelector('.chip-clear').hidden = !picked.size;
+    }
 
     async function loadEvents() {
       const el = document.getElementById('content');
@@ -69,27 +102,34 @@
           return;
         }
         data.sort((a, b) => new Date(a.dateStart) - new Date(b.dateStart));
+        allEvents = data;
+        render(data);
+      } catch (err) {
+        el.innerHTML = '<div class="state error">Couldn\'t load events right now (' + err.message + '). Check that the Netlify function is deployed and NOTION_TOKEN is set.</div>';
+      }
+    }
 
+    function render(all) {
+      const el = document.getElementById('content');
+      const data = picked.size ? all.filter(item => picked.has(catKey(item))) : all;
+      {
         const today = new Date(); today.setHours(0,0,0,0);
         const upcoming = data.filter(item => new Date(item.dateStart) >= today);
         const past = data.filter(item => new Date(item.dateStart) < today).reverse(); // most recent past first
 
         let html = upcoming.length
           ? renderGrouped(upcoming)
-          : '<div class="state">No upcoming events.</div>';
+          : '<div class="state">' + (picked.size ? 'No upcoming events of this type.' : 'No upcoming events.') + '</div>';
 
-        if (past.length) {
-          html +=
-            '<details class="past-accordion">' +
-              '<summary>Past events (' + past.length + ')</summary>' +
-              '<div class="accordion-body">' + renderGrouped(past) + '</div>' +
-            '</details>';
+        const toggle = document.querySelector('.past-toggle');
+        toggle.hidden = !past.length;
+        toggle.querySelector('span').textContent = 'Past events (' + past.length + ')';
+        if (past.length && showPast) {
+          html += '<section id="past" class="past-events" aria-label="Past events"><h2 class="past-heading">Past events</h2>' + renderGrouped(past) + '</section>';
         }
 
         el.innerHTML = html;
         wireReadMore();
-      } catch (err) {
-        el.innerHTML = '<div class="state error">Couldn\'t load events right now (' + err.message + '). Check that the Netlify function is deployed and NOTION_TOKEN is set.</div>';
       }
     }
 
