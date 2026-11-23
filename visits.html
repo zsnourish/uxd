@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Site visits · Nourish UX and Design</title>
+  <link rel="icon" type="image/png" href="/assets/nourish-mark.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" />
+  <link rel="stylesheet" href="/assets/style.css" />
+  <style>
+    .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; }
+    .whoami { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); flex-wrap: wrap; }
+    .whoami select { font: inherit; font-weight: 600; color: var(--ink); padding: 6px 10px; border-radius: var(--radius); border: 1px solid var(--line); background: var(--canvas); }
+    .whoami a { font-size: 13px; }
+
+    .btn { appearance: none; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none;
+      display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: var(--radius);
+      border: 1px solid var(--line); background: var(--canvas); color: var(--ink); }
+    .btn:hover { background: var(--tint); }
+    .btn.primary { background: var(--sage-deep); border-color: var(--sage-deep); color: #fff; }
+    .btn.primary:hover { background: #24493a; }
+    .btn.danger { background: var(--bad); border-color: var(--bad); color: #fff; }
+    .btn.link { border-color: transparent; background: none; color: var(--sage-deep); padding-left: 6px; padding-right: 6px; }
+    .btn.link:hover { background: var(--tint); }
+    .btn.link.danger-text { color: var(--bad); }
+    .btn[disabled] { opacity: 0.55; cursor: progress; }
+
+    .panel { background: var(--canvas); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); padding: 20px; margin-bottom: 24px; }
+    .panel h2 { font-size: 18px; margin: 0 0 4px; color: var(--ink); }
+    .panel .lede { margin: 0 0 16px; color: var(--muted); font-size: 14px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 16px; }
+    .form-grid .full { grid-column: 1 / -1; }
+    .times { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 12px; }
+    .field label { display: block; font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+    .field .hint { font-size: 13px; color: var(--muted); margin: -2px 0 6px; }
+    .field input, .field select, .field textarea { width: 100%; font: inherit; font-size: 15px; color: var(--ink);
+      padding: 8px 10px; border-radius: var(--radius); border: 1px solid #c9d6ce; background: var(--canvas); }
+    .field textarea { min-height: 72px; resize: vertical; }
+    .form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+    .form-error { margin: 14px 0 0; padding: 10px 12px; border-radius: var(--radius); background: var(--bad-bg); color: var(--bad); font-size: 14px; }
+
+    .visit { background: var(--canvas); border-radius: var(--radius-lg); box-shadow: var(--ring); margin-bottom: 8px; transition: box-shadow 0.15s; }
+    .visit:hover, .visit.open { box-shadow: 0 0 0 1px var(--tint-3); }
+    .visit-head { display: flex; align-items: center; gap: 12px; padding: 0 16px 0 0; }
+    .visit-toggle { appearance: none; border: 0; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer;
+      flex: 1; min-width: 0; display: flex; align-items: center; gap: 16px; padding: 14px 0 14px 16px; border-radius: var(--radius-lg); }
+    .visit-date { flex: none; width: 44px; text-align: center; line-height: 1.15; color: var(--muted); font-size: 12px; font-weight: 600; }
+    .visit-date .day { display: block; font-size: 20px; font-weight: 700; color: var(--ink); }
+    .visit-main { min-width: 0; }
+    .visit-title { margin: 0; font-size: 15px; font-weight: 700; color: var(--ink); }
+    .visit-meta { margin: 2px 0 0; font-size: 14px; color: var(--muted); }
+    .visit-alert { margin: 4px 0 0; font-size: 13px; font-weight: 600; color: #8a6a1f; }
+    .visit-alert.bad { color: var(--bad); }
+    .visit-side { flex: none; font-size: 14px; font-weight: 600; }
+    .visit-side .going { color: var(--sage-deep); }
+    .visit-side .muted { color: var(--faint); font-weight: 500; }
+    .visit-side .bad { color: var(--bad); }
+    .visit-side .btn { padding: 5px 12px; }
+    .chev { flex: none; color: var(--muted); transition: transform 0.15s; }
+    .visit.open .chev { transform: rotate(90deg); }
+    .visit-detail { border-top: 1px solid var(--line-soft); padding: 12px 16px 16px 76px; font-size: 14px; }
+    .visit-detail p { margin: 0 0 6px; }
+    .visit-detail .label { color: var(--muted); }
+    .purpose { white-space: pre-line; }
+    .actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; align-items: center; }
+    .notice { margin-top: 12px; padding: 10px 12px; border-radius: var(--radius); background: var(--cat-ext-bg); color: #5c4612; font-size: 14px; }
+    .notice.ok { background: var(--tint-2); color: var(--sage-deep); }
+    .notice.bad { background: var(--bad-bg); color: var(--bad); }
+    .notice .actions { margin-top: 8px; }
+    .confirm { margin-top: 12px; padding: 10px 12px; border-radius: var(--radius); background: var(--tint); font-size: 14px; }
+    .confirm .actions { margin-top: 8px; }
+    .rules { font-size: 13px; color: var(--faint); margin: 0 0 20px; }
+    .past-accordion .visit-title, .past-accordion .visit-date .day { color: var(--muted); }
+
+    @media (max-width: 560px) {
+      .form-grid, .times { grid-template-columns: 1fr; }
+      .visit-head { flex-wrap: wrap; padding: 0 12px 12px 0; }
+      .visit-toggle { flex-basis: 100%; padding: 12px 0 4px 12px; gap: 12px; }
+      .visit-side { margin-left: 68px; }
+      .visit-detail { padding: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site">
+    <div class="wrap">
+      <a class="brand" href="/" aria-label="Nourish UX and Design noticeboard home">
+        <img src="/assets/nourish-logo.png" alt="Nourish" class="brand-logo" />
+        <span class="brand-divider" aria-hidden="true"></span>
+        <span class="brand-text"><strong>UX and Design</strong><span>Team noticeboard</span></span>
+      </a>
+      <nav class="tabs">
+        <a href="/">Updates</a>
+        <a href="/dates.html">Team dates</a>
+        <a href="/visits" class="active">Site visits</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="wrap">
+      <p class="eyebrow">UX and Design at Nourish</p>
+      <h1 class="page-title">Site visits</h1>
+      <p class="page-sub">Care home and agency visits. Opt in to join one, and add it to your Outlook calendar.</p>
+    </div>
+  </section>
+
+  <main class="wrap">
+    <div id="status" role="status" aria-live="polite"></div>
+    <div id="app"><div class="state">Loading site visits…</div></div>
+  </main>
+
+  <footer class="site"><img src="/assets/nourish-mark.png" alt="" class="footer-mark" />Nourish UX and Design team</footer>
+
+  <script>
+  (() => {
+    const SITE = location.origin
+    const ME_KEY = 'uxd-visits-me'
+    const KINDS = ['Care home', 'Home care agency', 'Other']
+    const state = { team: [], visits: [], maxPeople: 2, customerListUrl: '', viewer: null, local: false, open: new Set(), me: null, editing: null, adding: false, confirming: null, flash: {}, formError: '' }
+    const app = document.getElementById('app')
+
+    // ── Local previews only: who to act as (live, it comes from the GitHub sign-in) ──
+    const readMe = () => { try { return localStorage.getItem(ME_KEY) } catch { return null } }
+    const writeMe = (id) => { try { id ? localStorage.setItem(ME_KEY, id) : localStorage.removeItem(ME_KEY) } catch {} }
+
+    // ── Helpers ──
+    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
+    const member = (id) => state.team.find((m) => m.id === id) || { id, name: 'Someone who has left the team', email: '' }
+    const first = (id) => member(id).name.split(' ')[0]
+    const noon = (date) => new Date(date + 'T12:00:00Z')
+    const fmtDate = (date) => noon(date).toLocaleDateString('en-GB', { weekday: 'short', timeZone: 'UTC' }) + ' ' + noon(date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })
+    const fmtStamp = (iso) => new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Europe/London' })
+    const today = () => new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/London' })
+    const people = (v) => [v.organiser, ...v.attendees]
+    const canManage = () => Boolean(state.me && (state.me.organiser || state.me.admin))
+    const isMine = (v) => state.me && people(v).includes(state.me.id)
+    const changedForMe = (v) => state.me && v.attendees.includes(state.me.id) && (v.seen?.[state.me.id] ?? -1) < v.sequence
+    const placesLeft = (v) => Math.max(0, state.maxPeople - people(v).length)
+    const label = (v) => v.code + ', ' + v.town
+    const detailsLink = (v) => v.link || state.customerListUrl || ''
+
+    // ── API ──
+    async function api(body) {
+      const res = await fetch('/api/visits', {
+        method: body ? 'POST' : 'GET',
+        headers: body ? { 'Content-Type': 'application/json' } : {},
+        body: body ? JSON.stringify(state.local ? { ...body, as: state.me?.id } : body) : undefined,
+        credentials: 'same-origin',
+      })
+      const data = await res.json().catch(() => ({}))
+      if (res.status === 401) { location.href = '/visits'; throw new Error('Signed out') }
+      if (!res.ok) throw new Error(data.error || 'Something went wrong (' + res.status + ').')
+      return data
+    }
+
+    async function load() {
+      try {
+        const data = await api()
+        state.team = data.team
+        state.maxPeople = data.maxPeople
+        state.customerListUrl = data.customerListUrl || ''
+        state.visits = data.visits
+        state.viewer = data.viewer
+        state.local = Boolean(data.local)
+        const meId = state.local ? readMe() : data.me
+        state.me = state.team.find((m) => m.id === meId) || null
+        render()
+      } catch (err) {
+        app.innerHTML = '<div class="state error">Couldn’t load site visits: ' + esc(err.message) + '</div>'
+      }
+    }
+
+    async function act(body, button, after) {
+      if (button) button.disabled = true
+      try {
+        const data = await api(body)
+        state.visits = data.visits
+        after && after(data)
+      } catch (err) {
+        state.flash[body.id || 'form'] = { tone: 'bad', html: esc(err.message) }
+        if (!body.id) state.formError = err.message
+        await refreshQuietly()
+      }
+      render()
+    }
+
+    async function refreshQuietly() {
+      try { const data = await api(); state.visits = data.visits } catch {}
+    }
+
+    // ── Calendar files ──
+    const icsText = (s) => String(s ?? '').replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n')
+    const icsLocal = (date, time) => date.replace(/-/g, '') + 'T' + time.replace(':', '') + '00'
+    const fold = (line) => {
+      const out = []
+      let rest = line
+      while (rest.length > 74) { out.push(rest.slice(0, 74)); rest = ' ' + rest.slice(74) }
+      out.push(rest)
+      return out.join('\r\n')
+    }
+    function ics(v, cancel) {
+      const org = member(v.organiser)
+      const others = v.attendees.map((id) => member(id).name).join(', ')
+      const description = [
+        v.kind + ' visit with ' + org.name + (others ? ' and ' + others : '') + '.',
+        v.purpose,
+        detailsLink(v) ? 'Customer details (Nourish sign-in): ' + detailsLink(v) : '',
+        'Changes: ' + SITE + '/visits',
+      ].filter(Boolean).join('\n\n')
+      const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+Z$/, 'Z')
+      const lines = [
+        'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Nourish UX and Design//Site visits//EN', 'CALSCALE:GREGORIAN',
+        'METHOD:' + (cancel ? 'CANCEL' : 'PUBLISH'),
+        'BEGIN:VTIMEZONE', 'TZID:Europe/London',
+        'BEGIN:DAYLIGHT', 'TZOFFSETFROM:+0000', 'TZOFFSETTO:+0100', 'TZNAME:BST', 'DTSTART:19700329T010000', 'RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU', 'END:DAYLIGHT',
+        'BEGIN:STANDARD', 'TZOFFSETFROM:+0100', 'TZOFFSETTO:+0000', 'TZNAME:GMT', 'DTSTART:19701025T020000', 'RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU', 'END:STANDARD',
+        'END:VTIMEZONE',
+        'BEGIN:VEVENT',
+        'UID:site-visit-' + v.id + '@uxnourish.netlify.app',
+        'SEQUENCE:' + (v.sequence + (cancel ? 1 : 0)),
+        'DTSTAMP:' + stamp,
+        'DTSTART;TZID=Europe/London:' + icsLocal(v.date, v.start),
+        'DTEND;TZID=Europe/London:' + icsLocal(v.date, v.end),
+        'SUMMARY:' + icsText('Site visit: ' + label(v)),
+        'LOCATION:' + icsText(v.town),
+        'DESCRIPTION:' + icsText(description),
+        'STATUS:' + (cancel ? 'CANCELLED' : 'CONFIRMED'),
+        'TRANSP:OPAQUE',
+        cancel ? '' : 'BEGIN:VALARM\r\nACTION:DISPLAY\r\nDESCRIPTION:Site visit\r\nTRIGGER:-P1D\r\nEND:VALARM',
+        'END:VEVENT', 'END:VCALENDAR',
+      ].filter(Boolean)
+      return lines.flatMap((l) => l.split('\r\n')).map(fold).join('\r\n') + '\r\n'
+    }
+    function download(v, cancel) {
+      const blob = new Blob([ics(v, cancel)], { type: 'text/calendar;charset=utf-8' })
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      a.download = (cancel ? 'cancelled-' : '') + 'site-visit-' + label(v).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + v.date + '.ics'
+      document.body.appendChild(a); a.click(); a.remove()
+      setTimeout(() => URL.revokeObjectURL(a.href), 2000)
+    }
+    function outlookWebUrl(v) {
+      const p = new URLSearchParams({
+        path: '/calendar/action/compose', rru: 'addevent',
+        subject: 'Site visit: ' + label(v),
+        startdt: v.date + 'T' + v.start + ':00', enddt: v.date + 'T' + v.end + ':00',
+        location: v.town,
+        body: (v.purpose ? v.purpose + '\n\n' : '') + (detailsLink(v) ? 'Customer details (Nourish sign-in): ' + detailsLink(v) + '\n\n' : '') + 'Changes: ' + SITE + '/visits',
+      })
+      return 'https://outlook.office.com/calendar/deeplink/compose?' + p.toString()
+    }
+    function mailto(v, ids, kind) {
+      const emails = ids.map((id) => member(id).email).filter(Boolean)
+      if (!emails.length) return ''
+      const subject = (kind === 'cancelled' ? 'Cancelled: ' : 'Changed: ') + 'site visit to ' + label(v) + ' on ' + fmtDate(v.date)
+      const body = kind === 'cancelled'
+        ? 'Hi,\n\nThe site visit to ' + label(v) + ' on ' + fmtDate(v.date) + ' is cancelled. You can take it out of your calendar from ' + SITE + '/visits.\n'
+        : 'Hi,\n\nThe site visit to ' + label(v) + ' has changed. It’s now on ' + fmtDate(v.date) + ', ' + v.start + ' to ' + v.end + ', in ' + v.town + '.\n\nUpdate your calendar from ' + SITE + '/visits.\n'
+      return 'mailto:' + emails.join(',') + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body)
+    }
+
+    // ── Rendering ──
+    function render() {
+      if (state.local && !state.me) return renderPicker()
+      const t = today()
+      const live = state.visits.filter((v) => v.status !== 'cancelled' || (state.me && v.attendees.includes(state.me.id)))
+      const upcoming = live.filter((v) => v.date >= t).sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start))
+      const past = live.filter((v) => v.date < t && v.status !== 'cancelled').sort((a, b) => (b.date + b.start).localeCompare(a.date + a.start))
+
+      let html = toolbar()
+      if (state.adding) html += form(null)
+      html += '<p class="rules">Up to ' + state.maxPeople + ' people go on each visit: the organiser and one other. Withdraw any time to free up your place.</p>'
+      html += upcoming.length ? grouped(upcoming) : '<div class="state">No upcoming site visits yet.' + (canManage() ? ' Add one to get started.' : '') + '</div>'
+      if (past.length) {
+        html += '<details class="past-accordion"><summary>Past visits (' + past.length + ')</summary><div class="accordion-body">' + past.map((v) => card(v, true)).join('') + '</div></details>'
+      }
+      app.innerHTML = html
+    }
+
+    function renderPicker() {
+      app.innerHTML =
+        '<div class="panel"><h2>Local preview</h2><p class="lede">There’s no sign-in on this machine, so pick who to preview as. On the live site, people are matched from their GitHub sign-in.</p>' +
+        '<div class="field"><label for="pick">Your name</label><select id="pick"><option value="">Choose your name</option>' +
+        state.team.map((m) => '<option value="' + esc(m.id) + '">' + esc(m.name) + '</option>').join('') +
+        '</select></div><div class="form-actions"><button class="btn primary" data-do="pick">Continue</button></div></div>'
+    }
+
+    function toolbar() {
+      let who
+      if (state.local) {
+        who = '<label for="me">Previewing as</label><select id="me">' +
+          state.team.map((m) => '<option value="' + esc(m.id) + '"' + (m.id === state.me.id ? ' selected' : '') + '>' + esc(m.name) + '</option>').join('') + '</select>'
+      } else if (state.me) {
+        who = '<span>Signed in as <strong>' + esc(state.me.name) + '</strong> with GitHub</span><a href="/auth/signout?next=/visits">Sign out</a>'
+      } else {
+        who = '<span>Signed in with ' + (state.viewer?.provider === 'github' ? 'GitHub as <strong>' + esc(state.viewer.login) + '</strong>' : 'the team password') + '</span><a href="/auth/signout?next=/visits">Sign out</a>'
+      }
+      let note = ''
+      if (!state.me && state.viewer?.provider === 'github') {
+        note = '<div class="notice" style="margin:0 0 20px">Your GitHub account (' + esc(state.viewer.login) + ') isn’t on the team list, so you can see visits but not opt in. Ask Zahra to add it.</div>'
+      } else if (!state.me) {
+        note = '<div class="notice" style="margin:0 0 20px">You can see visits with the team password. To opt in, <a href="/auth/signout?next=/visits">sign out</a> and sign in with GitHub.</div>'
+      }
+      return '<div class="toolbar"><div class="whoami">' + who + '</div>' +
+        (canManage() && !state.adding ? '<button class="btn primary" data-do="add">Add a visit</button>' : '') + '</div>' + note
+    }
+
+    function grouped(list) {
+      let html = '', month = ''
+      for (const v of list) {
+        const m = noon(v.date).toLocaleDateString('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' })
+        if (m !== month) { html += '<div class="month-heading">' + m + '</div>'; month = m }
+        html += state.editing === v.id ? form(v) : card(v, false)
+      }
+      return html
+    }
+
+    function card(v, past) {
+      const d = noon(v.date)
+      const opt = (o) => d.toLocaleDateString('en-GB', { ...o, timeZone: 'UTC' })
+      const cancelled = v.status === 'cancelled'
+      const mine = isMine(v)
+      const left = placesLeft(v)
+      const id = esc(v.id)
+      const changed = changedForMe(v) && !past
+      const flash = state.flash[v.id]
+      const open = state.open.has(v.id) || changed || Boolean(flash) || state.confirming?.id === v.id
+
+      const names = people(v).map(first)
+      const going = names.length > 1 ? names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1] : names[0]
+      const meta = [esc(v.start) + ' to ' + esc(v.end), esc(v.kind), esc(going) + (!cancelled && !past && left ? ', ' + left + (left === 1 ? ' place' : ' places') + ' free' : '')]
+
+      let alert = ''
+      if (changed) {
+        const what = cancelled ? 'cancelled this visit' : v.lastChange === 'rescheduled' ? 'rescheduled this visit' : v.lastChange === 'moved' ? 'changed where this visit is' : 'updated this visit'
+        alert = '<p class="visit-alert' + (cancelled ? ' bad' : '') + '">' + esc(first(v.updatedBy)) + ' ' + what + '. ' + (cancelled ? 'Remove it from your calendar.' : 'Update your calendar.') + '</p>'
+      }
+
+      let side = ''
+      if (cancelled) side = '<span class="bad">Cancelled</span>'
+      else if (past) side = ''
+      else if (mine) side = '<span class="going">You’re going</span>'
+      else if (left > 0 && state.me) side = '<button class="btn primary" data-do="join" data-id="' + id + '">Opt in</button>'
+      else if (!left) side = '<span class="muted">Full</span>'
+
+      let html = '<article class="visit' + (open ? ' open' : '') + '">' +
+        '<div class="visit-head"><button class="visit-toggle" data-do="toggle" data-id="' + id + '" aria-expanded="' + open + '" aria-controls="d-' + id + '">' +
+        '<span class="visit-date">' + opt({ weekday: 'short' }) + '<span class="day">' + opt({ day: 'numeric' }) + '</span>' + opt({ month: 'short' }) + '</span>' +
+        '<span class="visit-main"><h3 class="visit-title">' + esc(v.code) + ' · ' + esc(v.town) + '</h3><p class="visit-meta">' + meta.join(' · ') + '</p>' + alert + '</span></button>' +
+        (side ? '<div class="visit-side">' + side + '</div>' : '') +
+        '<svg class="chev" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16"><path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'
+
+      if (!open) return html + '</article>'
+
+      html += '<div class="visit-detail" id="d-' + id + '">' +
+        '<p><span class="label">When:</span> ' + fmtDate(v.date) + ', ' + esc(v.start) + ' to ' + esc(v.end) + '</p>' +
+        '<p><span class="label">Going:</span> ' + esc(member(v.organiser).name) + ' (organiser)' + v.attendees.map((a) => ', ' + esc(member(a).name)).join('') + '</p>' +
+        (detailsLink(v) ? '<p><a href="' + esc(detailsLink(v)) + '" target="_blank" rel="noopener">Customer details</a> <span class="label">(needs Nourish sign-in)</span></p>' : '') +
+        (v.purpose ? '<p class="purpose">' + esc(v.purpose) + '</p>' : '')
+
+      if (changed) {
+        html += cancelled
+          ? '<div class="actions"><button class="btn" data-do="ics-cancel" data-id="' + id + '">Download the cancellation</button><button class="btn link" data-do="seen" data-id="' + id + '">I’ve removed it</button></div>'
+          : '<div class="actions"><button class="btn" data-do="ics-update" data-id="' + id + '">Download the update</button><button class="btn link" data-do="seen" data-id="' + id + '">I’ve updated it</button></div>'
+      }
+      if (flash) html += '<div class="notice ' + (flash.tone || '') + '">' + flash.html + '</div>'
+      if (state.confirming?.id === v.id) html += confirmBox(v)
+      else if (!cancelled && !past) html += actions(v, mine, left, changed)
+      return html + '</div></article>'
+    }
+
+    function actions(v, mine, left, changed) {
+      if (!state.me) return ''
+      const id = esc(v.id)
+      const me = state.me.id
+      const out = []
+      if (v.attendees.includes(me)) {
+        if (!changed) {
+          out.push('<button class="btn" data-do="ics" data-id="' + id + '">Add to Outlook</button>')
+          out.push('<a class="btn link" href="' + outlookWebUrl(v) + '" target="_blank" rel="noopener">Outlook on the web</a>')
+        }
+        out.push('<button class="btn link danger-text" data-do="ask-withdraw" data-id="' + id + '">Withdraw</button>')
+      } else if (v.organiser === me) {
+        out.push('<button class="btn" data-do="ics" data-id="' + id + '">Add to Outlook</button>')
+      }
+      if (canManage()) {
+        out.push('<button class="btn link" data-do="edit" data-id="' + id + '">Edit</button>')
+        out.push('<button class="btn link danger-text" data-do="ask-delete" data-id="' + id + '">Delete</button>')
+        if (v.attendees.length) {
+          const href = mailto(v, v.attendees, 'changed')
+          if (href) out.push('<a class="btn link" href="' + esc(href) + '">Email ' + esc(v.attendees.map(first).join(' and ')) + '</a>')
+        }
+      }
+      return out.length ? '<div class="actions">' + out.join('') + '</div>' : ''
+    }
+
+    function confirmBox(v) {
+      const id = esc(v.id)
+      if (state.confirming.kind === 'withdraw') {
+        return '<div class="confirm">Withdraw from this visit? Your place goes back to the team.' +
+          '<div class="actions"><button class="btn danger" data-do="withdraw" data-id="' + id + '">Withdraw</button><button class="btn link" data-do="cancel-confirm">Keep my place</button></div></div>'
+      }
+      const who = v.attendees.map((a) => member(a).name).join(' and ')
+      return '<div class="confirm">Delete this visit?' + (who ? ' ' + esc(who) + ' opted in. They’ll see the cancellation here, and you can email them.' : ' Nobody else has opted in.') +
+        '<div class="actions"><button class="btn danger" data-do="delete" data-id="' + id + '">Delete visit</button><button class="btn link" data-do="cancel-confirm">Keep visit</button></div></div>'
+    }
+
+    function form(v) {
+      const src = state.draft || v
+      const val = (k, d = '') => esc(src ? src[k] : d)
+      return '<form class="panel" id="visit-form" data-id="' + (v ? esc(v.id) : '') + '" novalidate>' +
+        '<h2>' + (v ? 'Edit visit' : 'Add a visit') + '</h2>' +
+        '<p class="lede">' + (v ? 'If someone has opted in, they’ll be asked to update their calendar.' : esc(member((state.team.find((m) => m.organiser) || state.me).id).name) + ' is the organiser and is going by default.') + '</p>' +
+        '<div class="form-grid">' +
+        '<div class="field"><label for="f-code">Customer code</label><p class="hint">For example CH-014, from the customer list.</p><input id="f-code" name="code" required maxlength="20" autocomplete="off" value="' + val('code') + '"></div>' +
+        '<div class="field"><label for="f-kind">Type</label><p class="hint">&nbsp;</p><select id="f-kind" name="kind">' + KINDS.map((k) => '<option' + ((src ? src.kind : 'Care home') === k ? ' selected' : '') + '>' + k + '</option>').join('') + '</select></div>' +
+        '<div class="field"><label for="f-town">Town or area</label><p class="hint">For example Leeds. Not the street address or postcode.</p><input id="f-town" name="town" required maxlength="60" value="' + val('town') + '"></div>' +
+        '<div class="field"><label for="f-link">Customer details link (optional)</label><p class="hint">' + (state.customerListUrl ? 'Leave blank to use the team’s customer list.' : 'A SharePoint link to this customer’s details.') + '</p><input id="f-link" name="link" type="url" maxlength="500" placeholder="https://…sharepoint.com/…" value="' + val('link') + '"></div>' +
+        '<div class="full times"><div class="field"><label for="f-date">Date</label><input id="f-date" name="date" type="date" required value="' + val('date') + '"></div>' +
+        '<div class="field"><label for="f-start">Start</label><input id="f-start" name="start" type="time" required value="' + val('start', '10:00') + '"></div>' +
+        '<div class="field"><label for="f-end">End</label><input id="f-end" name="end" type="time" required value="' + val('end', '12:00') + '"></div></div>' +
+        '<div class="field full"><label for="f-purpose">Purpose and notes (optional)</label><p class="hint">What the visit is for and anything people need to know.</p><textarea id="f-purpose" name="purpose" maxlength="1500">' + val('purpose') + '</textarea></div>' +
+        '</div>' +
+        '<p class="notice" style="margin-top:16px">Don’t enter customer names, full addresses, contact details or anything about residents or clients here. They stay in the customer list in SharePoint.</p>' +
+        (state.formError ? '<p class="form-error" role="alert">' + esc(state.formError) + '</p>' : '') +
+        '<div class="form-actions"><button type="button" class="btn link" data-do="close-form">Cancel</button><button type="submit" class="btn primary">' + (v ? 'Save changes' : 'Add visit') + '</button></div></form>'
+    }
+
+    // ── Events ──
+    app.addEventListener('change', (e) => {
+      if (e.target.id === 'me') {
+        writeMe(e.target.value)
+        state.me = member(e.target.value)
+        state.flash = {}; state.confirming = null; state.adding = false; state.editing = null
+        render()
+      }
+    })
+
+    app.addEventListener('submit', (e) => {
+      if (e.target.id !== 'visit-form') return
+      e.preventDefault()
+      const f = new FormData(e.target)
+      const visit = Object.fromEntries(['code', 'kind', 'town', 'link', 'date', 'start', 'end', 'purpose'].map((k) => [k, (f.get(k) || '').toString()]))
+      const id = e.target.dataset.id
+      state.formError = ''
+      state.draft = visit
+      act(id ? { action: 'update', id, visit } : { action: 'create', visit }, e.target.querySelector('[type=submit]'), (data) => {
+        state.adding = false; state.editing = null; state.draft = null
+        const v = state.visits.find((x) => x.id === data.id)
+        if (id && v && v.attendees.length) {
+          const href = mailto(v, v.attendees, 'changed')
+          state.flash[id] = { tone: 'ok', html: 'Saved. ' + esc(v.attendees.map(first).join(' and ')) + ' will be asked to update their calendar here.' + (href ? ' <a href="' + esc(href) + '">Email them about the change</a>.' : '') }
+        } else if (v) {
+          state.flash[v.id] = { tone: 'ok', html: id ? 'Saved.' : 'Visit added. The team can now opt in.' }
+        }
+      })
+    })
+
+    app.addEventListener('click', (e) => {
+      const el = e.target.closest('[data-do]')
+      if (!el) return
+      const id = el.dataset.id
+      const v = state.visits.find((x) => x.id === id)
+      const todo = el.dataset.do
+      if (todo !== 'pick') state.flash = id ? { ...state.flash, [id]: undefined } : state.flash
+
+      switch (todo) {
+        case 'pick': {
+          const chosen = document.getElementById('pick').value
+          if (!chosen) return
+          writeMe(chosen); state.me = member(chosen); return render()
+        }
+        case 'add': state.adding = true; state.editing = null; state.formError = ''; state.draft = null; render(); return document.getElementById('f-code')?.focus()
+        case 'edit': state.editing = id; state.adding = false; state.formError = ''; state.draft = null; render(); return document.getElementById('f-code')?.focus()
+        case 'close-form': state.adding = false; state.editing = null; state.formError = ''; state.draft = null; return render()
+        case 'toggle':
+          if (state.open.has(id)) state.open.delete(id); else state.open.add(id)
+          return render()
+        case 'ask-withdraw': state.confirming = { id, kind: 'withdraw' }; return render()
+        case 'ask-delete': state.confirming = { id, kind: 'delete' }; return render()
+        case 'cancel-confirm': state.confirming = null; return render()
+        case 'ics': return download(v, false)
+        case 'ics-update': download(v, false); return act({ action: 'seen', id }, el)
+        case 'ics-cancel': download(v, true); return act({ action: 'seen', id }, el)
+        case 'seen': return act({ action: 'seen', id }, el)
+        case 'join':
+          state.open.add(id)
+          return act({ action: 'join', id }, el, () => {
+            state.flash[id] = { tone: 'ok', html: '<strong>You’re going.</strong> Add it to your Outlook calendar with the button below. If ' + esc(first(v.organiser)) + ' changes or cancels the visit, you’ll see it here.' }
+          })
+        case 'withdraw': {
+          const snapshot = { ...v }
+          state.confirming = null
+          return act({ action: 'withdraw', id }, el, () => {
+            download(snapshot, true)
+            state.flash[id] = { tone: 'ok', html: 'You’ve withdrawn. A cancellation file has downloaded so you can take it out of your calendar.' }
+          })
+        }
+        case 'delete': {
+          const snapshot = { ...v }
+          state.confirming = null
+          return act({ action: 'delete', id }, el, () => {
+            const href = snapshot.attendees.length ? mailto(snapshot, snapshot.attendees, 'cancelled') : ''
+            showStatus('Visit to ' + esc(label(snapshot)) + ' deleted.' + (href ? ' <a href="' + esc(href) + '">Email ' + esc(snapshot.attendees.map(first).join(' and ')) + ' about it</a>.' : ''))
+          })
+        }
+      }
+    })
+
+    function showStatus(html) {
+      const el = document.getElementById('status')
+      el.innerHTML = '<div class="notice ok" style="margin:0 0 20px">' + html + '</div>'
+    }
+
+    load()
+  })()
+  </script>
+</body>
+</html>

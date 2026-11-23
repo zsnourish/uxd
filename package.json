@@ -1,0 +1,8 @@
+{
+  "name": "uxd-noticeboard",
+  "private": true,
+  "description": "Nourish UX and Design team noticeboard (static pages, Netlify Functions, gated site visits)",
+  "dependencies": {
+    "@netlify/blobs": "^10.0.0"
+  }
+}

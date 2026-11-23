@@ -7,6 +7,7 @@ the team edits the Notion databases — just a page refresh.
 ## Pages
 - `/index.html` — Team Updates (announcements)
 - `/dates.html` — Team Events
+- `/visits` — Site visits (gated; see below)
 
 ## 1. Notion database schema
 
@@ -62,3 +63,40 @@ git add .
 git commit -m "Add Team Noticeboard site (Notion-backed)"
 git push
 ```
+
+## Site visits (`/visits`)
+
+Care home and agency visits the team can opt in to. Caitlin (any `organiser` in the team list)
+adds, edits and deletes visits and is always going. Anyone else can opt in while there's a place
+(2 people per visit: the organiser plus one), add the visit to Outlook, and withdraw any time.
+
+- **No customer details on Netlify.** A visit holds a customer code (letters-hyphen-numbers, for
+  example CH-014), the town or area (no street address or postcode), date, time, purpose and who's
+  going, plus a link to the customer details in SharePoint (Nourish sign-in). Caitlin keeps the
+  code-to-customer list there. The API rejects names as codes, addresses in the town field and
+  non-SharePoint links. Past visits stay as a history.
+- **Gate.** `netlify/edge-functions/gate.js` (ported from the Pulse docs site) covers `/visits`,
+  `/auth/*` and `/api/visits`: GitHub (members of the `nourishcare` org) or the shared team
+  password. It fails closed: with no sign-in method set, the area returns 503. The rest of the
+  noticeboard stays public.
+- **Who you are.** Taken from the GitHub sign-in, matched to the team list on `github` handle or a
+  verified GitHub email. Shared-password visitors can see visits but not opt in or change anything.
+- **Data.** Netlify Blobs store `site-visits`, written with an ETag check so two people can't take
+  the last place.
+- **Outlook.** No email is sent. Opting in offers an `.ics` file and an Outlook on the web link,
+  both titled "Site visit: CH-014, Leeds" with the SharePoint link. When a visit is rescheduled or
+  cancelled, the person going sees it on the page with an updated or cancelling `.ics`, and the
+  organiser gets an "Email <name>" link.
+
+Environment variables (Netlify, all scopes):
+- `SESSION_SECRET` — random string that signs the session cookie (required)
+- `SITE_PASSWORD` — the shared team password
+- `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` — a GitHub OAuth app with callback
+  `https://uxnourish.netlify.app/auth/github/callback` (optional `GITHUB_ORG`, default `nourishcare`)
+- `VISITS_TEAM` — JSON list of `{ id, name, email, github, organiser?, admin? }`. It lives in
+  Netlify, not in this public repo.
+- `VISITS_CUSTOMER_LIST_URL` — SharePoint link to Caitlin's code-to-customer list (optional)
+
+Run locally with `npx netlify-cli dev --offline --dir .` and a `.env` holding `VISITS_TEAM`.
+Locally there's no sign-in (you pick who to preview as) and Blobs writes aren't conditional, so
+test the gate and the two-person cap on the live site.
