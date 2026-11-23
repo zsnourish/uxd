@@ -236,7 +236,9 @@ footer.site { display: flex; align-items: center; justify-content: center; gap: 
   .hero::after { width: 140px; height: 140px; right: -30px; top: -20px; }
   .filters { flex-wrap: wrap; gap: 8px; }
   .chips { display: contents; }
-  .filters { gap: 10px 6px; }
+  .filters { gap: 10px 6px; justify-content: center; }
+  .past-toggle { margin-left: 0; }
+  .chip-clear + .past-toggle, .chip-clear:not([hidden]) ~ .past-toggle { margin-left: 16px; }
   .filters-label, .chip-more { display: none; }
   .chip { padding: 0 11px 0 10px; gap: 6px; font-size: 13px; }
   .chip-clear { padding: 0 2px; }
