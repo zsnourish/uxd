@@ -7,11 +7,10 @@
 // with an etag check so two people opting in at once can't both take the last place.
 //
 // No customer details are stored here. A visit holds a customer code (for example
-// CH-014), the town or area (never the full address: an address identifies the care
-// home on CQC), date, time, purpose and who's going, plus a link to the customer
-// details in SharePoint, which needs a Nourish Microsoft sign-in to open. Caitlin
-// keeps the code-to-customer list there. The default link comes from the
-// VISITS_CUSTOMER_LIST_URL environment variable; a visit can carry its own link.
+// CH-014), a simple area (town or city plus the first part of the postcode, for
+// example "Leeds LS1"; never the full address, because an address identifies the
+// care home on CQC), date, time, purpose and who's going. Caitlin keeps the
+// code-to-customer list herself.
 //
 // The team list comes from the VISITS_TEAM environment variable, because this repo
 // is public and names with emails don't belong in it:
@@ -63,7 +62,6 @@ export default async (request, context) => {
       viewer: session ? { name: session.name, login: session.login || '', provider: session.provider } : { name: 'Local preview', provider: 'local' },
       local,
       maxPeople: MAX_PEOPLE,
-      customerListUrl: safeLink(env('VISITS_CUSTOMER_LIST_URL')),
       visits: data.visits,
     })
   }
@@ -199,31 +197,29 @@ function clean(input = {}) {
   const visit = {
     code: text(input.code, 20).toUpperCase(),
     kind: KINDS.includes(input.kind) ? input.kind : 'Care home',
-    town: text(input.town, 60),
-    link: text(input.link, 500),
+    town: area(input.town),
     date: text(input.date, 10),
     start: text(input.start, 5),
     end: text(input.end, 5),
     purpose: text(input.purpose, 1500),
   }
   if (!/^[A-Z]{1,6}-\d{1,6}$/.test(visit.code)) throw error('Add the customer code: letters, a hyphen, then numbers, for example CH-014. Not the customer’s name.')
-  if (!visit.town) throw error('Add the town or area.')
-  if (/\d/.test(visit.town) || visit.town.includes(',')) throw error('Add the town or area only, for example Leeds. Don’t add a street address or postcode.')
-  if (visit.link && !safeLink(visit.link)) throw error('The customer details link must be a Nourish SharePoint link (https://…sharepoint.com/…).')
+  if (!visit.town) throw error('Add the area, for example Leeds LS1.')
+  if (!/^[A-Za-z][A-Za-z .'-]{0,39}( [A-Z]{1,2}\d[A-Z\d]?)?$/.test(visit.town)) {
+    throw error('Add the town or city and the first part of the postcode only, for example Leeds LS1. Not the street address or full postcode.')
+  }
   if (!/^\d{4}-\d{2}-\d{2}$/.test(visit.date) || Number.isNaN(Date.parse(visit.date))) throw error('Add a date.')
   if (!/^\d{2}:\d{2}$/.test(visit.start) || !/^\d{2}:\d{2}$/.test(visit.end)) throw error('Add a start and end time.')
   if (visit.end <= visit.start) throw error('The end time must be after the start time.')
   return visit
 }
 
-// Only Nourish SharePoint links, so a visit can't point people anywhere else.
-function safeLink(value) {
-  try {
-    const url = new URL(value)
-    return url.protocol === 'https:' && /(^|\.)sharepoint\.com$/i.test(url.hostname) ? url.toString() : ''
-  } catch {
-    return ''
-  }
+// "leeds,  ls1" → "leeds LS1": tidy spacing, drop commas, upper-case the postcode district.
+function area(value) {
+  const words = String(value ?? '').replace(/,/g, ' ').trim().split(/\s+/).filter(Boolean)
+  const last = words[words.length - 1] || ''
+  if (words.length > 1 && /^[A-Za-z]{1,2}\d[A-Za-z\d]?$/.test(last)) words[words.length - 1] = last.toUpperCase()
+  return words.join(' ').slice(0, 60)
 }
 
 function isPast(visit) {

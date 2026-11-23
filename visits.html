@@ -120,7 +120,7 @@
     const SITE = location.origin
     const ME_KEY = 'uxd-visits-me'
     const KINDS = ['Care home', 'Home care agency', 'Other']
-    const state = { team: [], visits: [], maxPeople: 2, customerListUrl: '', viewer: null, local: false, open: new Set(), me: null, editing: null, adding: false, confirming: null, flash: {}, formError: '' }
+    const state = { team: [], visits: [], maxPeople: 2, viewer: null, local: false, open: new Set(), me: null, editing: null, adding: false, confirming: null, flash: {}, formError: '' }
     const app = document.getElementById('app')
 
     // ── Local previews only: who to act as (live, it comes from the GitHub sign-in) ──
@@ -141,7 +141,6 @@
     const changedForMe = (v) => state.me && v.attendees.includes(state.me.id) && (v.seen?.[state.me.id] ?? -1) < v.sequence
     const placesLeft = (v) => Math.max(0, state.maxPeople - people(v).length)
     const label = (v) => v.code + ', ' + v.town
-    const detailsLink = (v) => v.link || state.customerListUrl || ''
 
     // ── API ──
     async function api(body) {
@@ -162,7 +161,6 @@
         const data = await api()
         state.team = data.team
         state.maxPeople = data.maxPeople
-        state.customerListUrl = data.customerListUrl || ''
         state.visits = data.visits
         state.viewer = data.viewer
         state.local = Boolean(data.local)
@@ -208,7 +206,6 @@
       const description = [
         v.kind + ' visit with ' + org.name + (others ? ' and ' + others : '') + '.',
         v.purpose,
-        detailsLink(v) ? 'Customer details (Nourish sign-in): ' + detailsLink(v) : '',
         'Changes: ' + SITE + '/visits',
       ].filter(Boolean).join('\n\n')
       const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+Z$/, 'Z')
@@ -249,7 +246,7 @@
         subject: 'Site visit: ' + label(v),
         startdt: v.date + 'T' + v.start + ':00', enddt: v.date + 'T' + v.end + ':00',
         location: v.town,
-        body: (v.purpose ? v.purpose + '\n\n' : '') + (detailsLink(v) ? 'Customer details (Nourish sign-in): ' + detailsLink(v) + '\n\n' : '') + 'Changes: ' + SITE + '/visits',
+        body: (v.purpose ? v.purpose + '\n\n' : '') + 'Changes: ' + SITE + '/visits',
       })
       return 'https://outlook.office.com/calendar/deeplink/compose?' + p.toString()
     }
@@ -359,7 +356,6 @@
       html += '<div class="visit-detail" id="d-' + id + '">' +
         '<p><span class="label">When:</span> ' + fmtDate(v.date) + ', ' + esc(v.start) + ' to ' + esc(v.end) + '</p>' +
         '<p><span class="label">Going:</span> ' + esc(member(v.organiser).name) + ' (organiser)' + v.attendees.map((a) => ', ' + esc(member(a).name)).join('') + '</p>' +
-        (detailsLink(v) ? '<p><a href="' + esc(detailsLink(v)) + '" target="_blank" rel="noopener">Customer details</a> <span class="label">(needs Nourish sign-in)</span></p>' : '') +
         (v.purpose ? '<p class="purpose">' + esc(v.purpose) + '</p>' : '')
 
       if (changed) {
@@ -418,14 +414,13 @@
         '<div class="form-grid">' +
         '<div class="field"><label for="f-code">Customer code</label><p class="hint">For example CH-014, from the customer list.</p><input id="f-code" name="code" required maxlength="20" autocomplete="off" value="' + val('code') + '"></div>' +
         '<div class="field"><label for="f-kind">Type</label><p class="hint">&nbsp;</p><select id="f-kind" name="kind">' + KINDS.map((k) => '<option' + ((src ? src.kind : 'Care home') === k ? ' selected' : '') + '>' + k + '</option>').join('') + '</select></div>' +
-        '<div class="field"><label for="f-town">Town or area</label><p class="hint">For example Leeds. Not the street address or postcode.</p><input id="f-town" name="town" required maxlength="60" value="' + val('town') + '"></div>' +
-        '<div class="field"><label for="f-link">Customer details link (optional)</label><p class="hint">' + (state.customerListUrl ? 'Leave blank to use the team’s customer list.' : 'A SharePoint link to this customer’s details.') + '</p><input id="f-link" name="link" type="url" maxlength="500" placeholder="https://…sharepoint.com/…" value="' + val('link') + '"></div>' +
+        '<div class="field"><label for="f-town">Area</label><p class="hint">Town or city and the first part of the postcode, for example Leeds LS1.</p><input id="f-town" name="town" required maxlength="60" value="' + val('town') + '"></div>' +
         '<div class="full times"><div class="field"><label for="f-date">Date</label><input id="f-date" name="date" type="date" required value="' + val('date') + '"></div>' +
         '<div class="field"><label for="f-start">Start</label><input id="f-start" name="start" type="time" required value="' + val('start', '10:00') + '"></div>' +
         '<div class="field"><label for="f-end">End</label><input id="f-end" name="end" type="time" required value="' + val('end', '12:00') + '"></div></div>' +
         '<div class="field full"><label for="f-purpose">Purpose and notes (optional)</label><p class="hint">What the visit is for and anything people need to know.</p><textarea id="f-purpose" name="purpose" maxlength="1500">' + val('purpose') + '</textarea></div>' +
         '</div>' +
-        '<p class="notice" style="margin-top:16px">Don’t enter customer names, full addresses, contact details or anything about residents or clients here. They stay in the customer list in SharePoint.</p>' +
+        '<p class="notice" style="margin-top:16px">Don’t enter customer names, full addresses, contact details or anything about residents or clients here. Keep those in Caitlin’s customer list.</p>' +
         (state.formError ? '<p class="form-error" role="alert">' + esc(state.formError) + '</p>' : '') +
         '<div class="form-actions"><button type="button" class="btn link" data-do="close-form">Cancel</button><button type="submit" class="btn primary">' + (v ? 'Save changes' : 'Add visit') + '</button></div></form>'
     }
@@ -444,7 +439,7 @@
       if (e.target.id !== 'visit-form') return
       e.preventDefault()
       const f = new FormData(e.target)
-      const visit = Object.fromEntries(['code', 'kind', 'town', 'link', 'date', 'start', 'end', 'purpose'].map((k) => [k, (f.get(k) || '').toString()]))
+      const visit = Object.fromEntries(['code', 'kind', 'town', 'date', 'start', 'end', 'purpose'].map((k) => [k, (f.get(k) || '').toString()]))
       const id = e.target.dataset.id
       state.formError = ''
       state.draft = visit
