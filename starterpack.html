@@ -7,33 +7,12 @@
   <link rel="icon" type="image/png" href="assets/nourish-mark.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;650;700&display=swap" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css" />
-  <script>
-    /* Personalise with ?name=James&manager=Zahra&tag=Senior%20Product%20Designer */
-    (function () {
-      var params  = new URLSearchParams(window.location.search);
-      var name    = params.get('name');
-      var manager = params.get('manager');
-      var tag     = params.get('tag');
-
-      document.addEventListener('DOMContentLoaded', function () {
-        if (name) {
-          document.getElementById('welcome-heading').textContent = 'Welcome to Nourish, ' + name;
-          document.title = 'Welcome, ' + name + ' · Nourish UX and Design';
-        }
-        if (manager) {
-          document.querySelectorAll('[data-manager]').forEach(function (el) { el.textContent = manager; });
-        }
-        if (tag) {
-          document.getElementById('hero-tag').textContent = tag;
-        }
-      });
-    })();
-  </script>
-  <link rel="stylesheet" href="assets/starter.css" />
+  <link rel="stylesheet" href="assets/starter.css?v=3" />
 </head>
 <body>
+  <a class="skip" href="#content">Skip to content</a>
 
   <header class="site">
     <div class="wrap">
@@ -43,176 +22,195 @@
         <span class="brand-divider" aria-hidden="true"></span>
         <span class="brand-text"><strong>UX and Design</strong><span>Starter pack</span></span>
       </a>
-      <a class="header-link" href="https://uxnourish.netlify.app/" target="_blank" rel="noopener" aria-label="Team noticeboard">
+      <a class="header-link" href="https://uxnourish.netlify.app/" target="_blank" rel="noopener" aria-label="Team noticeboard (opens in a new tab)">
         <i class="ph ph-push-pin" aria-hidden="true"></i><span>Team noticeboard</span>
       </a>
     </div>
   </header>
 
-  <section class="hero" style="padding-top:0">
+  <div class="hero">
     <div class="wrap">
-      <p class="eyebrow" id="hero-tag">New starter</p>
-      <h1 id="welcome-heading">Welcome to Nourish</h1>
-      <p class="lede">Everything you need to settle in, find your feet and start doing great work with the team. Take your first week or two to learn the ropes, meet people and get comfortable with the product.</p>
-      <ul class="jump" aria-label="On this page">
-        <li><a href="#first-weeks"><i class="ph ph-flag" aria-hidden="true"></i>First two weeks</a></li>
-        <li><a href="#team"><i class="ph ph-users-three" aria-hidden="true"></i>How the team works</a></li>
-        <li><a href="#pulse"><i class="ph ph-squares-four" aria-hidden="true"></i>Pulse</a></li>
-        <li><a href="#brain"><i class="ph ph-brain" aria-hidden="true"></i>Product Brain and Claude</a></li>
-        <li><a href="#tools"><i class="ph ph-toolbox" aria-hidden="true"></i>Tools and links</a></li>
-      </ul>
+      <div>
+        <p class="eyebrow" id="hero-tag">New starter</p>
+        <h1 id="welcome-heading">Welcome to Nourish</h1>
+        <p class="lede">Everything you need to settle in and find your feet. Take your first week or two to learn the ropes, meet people and get comfortable with the product.</p>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <span class="t-sage"><i class="ph ph-hand-waving"></i></span>
+        <span class="t-slate"><i class="ph ph-figma-logo"></i></span>
+        <span class="t-sand"><i class="ph ph-coffee"></i></span>
+        <span class="t-mauve"><i class="ph ph-squares-four"></i></span>
+        <span class="t-clay"><i class="ph ph-users-three"></i></span>
+        <span class="t-sage"><i class="ph ph-lightbulb"></i></span>
+      </div>
     </div>
-  </section>
+  </div>
 
-  <main>
+  <div class="tabbar">
+    <div class="wrap">
+      <div class="tabs" role="tablist" aria-label="Starter pack sections">
+        <button type="button" role="tab" id="tab-first-weeks" aria-controls="first-weeks" aria-selected="true">First weeks</button>
+        <button type="button" role="tab" id="tab-team" aria-controls="team" aria-selected="false" tabindex="-1">How we work</button>
+        <button type="button" role="tab" id="tab-pulse" aria-controls="pulse" aria-selected="false" tabindex="-1">Pulse</button>
+        <button type="button" role="tab" id="tab-brain" aria-controls="brain" aria-selected="false" tabindex="-1">Product Brain</button>
+        <button type="button" role="tab" id="tab-tools" aria-controls="tools" aria-selected="false" tabindex="-1">Tools and links</button>
+      </div>
+    </div>
+  </div>
+
+  <main id="content">
     <div class="wrap">
 
-      <!-- First two weeks -->
-      <section id="first-weeks">
-        <p class="section-label"><i class="ph ph-flag" aria-hidden="true"></i>Getting started</p>
+      <!-- First weeks -->
+      <section role="tabpanel" id="first-weeks" aria-labelledby="tab-first-weeks" tabindex="0">
         <h2>Your first two weeks</h2>
+        <p class="intro">Four things to do as you settle in. There's no rush: take them at your own pace.</p>
         <ol class="steps">
           <li><div><strong>Welcome call with your line manager</strong><span>In your first few days, <span data-manager>Zahra, Hamid or Dean</span> walks you through how Nourish works and your objectives.</span></div></li>
           <li><div><strong>Intro calls</strong><span>A series of short calls with the UX and Design team and the people you'll work with most closely, plus HR and Finance for the admin essentials.</span></div></li>
-          <li><div><strong>Set up your tools</strong><span>Accept your Figma, Jira and Miro invites, and ask your line manager for GitHub access. You'll need it for Pulse and the Product Brain.</span></div></li>
-          <li><div><strong>Get to know the product</strong><span>Watch the sales demos and explore the demo environments. Both are under <a href="#tools">Tools and links</a>.</span></div></li>
+          <li><div><strong>Set up your tools</strong><span>Accept your Figma, Jira and Miro invites. Then <a href="https://github.com/signup" target="_blank" rel="noopener">sign up to GitHub<span class="sr-only"> (opens in a new tab)</span></a> with your Nourish email and ask Adam H or Ben Galvin to add you to Nourish's GitHub organisation, <strong>nourishcare</strong>. Send them your GitHub username. Everyone does this when they join: you need it for the Pulse docs and the Product Brain.</span></div></li>
+          <li><div><strong>Get to know the product</strong><span>Watch the sales demos and explore the demo environments. Both are in <a href="#tools" data-tab-link>Tools and links</a>.</span></div></li>
         </ol>
+        <div class="next"><a href="#team" data-tab-link>Next: How we work <i class="ph ph-arrow-right" aria-hidden="true"></i></a></div>
       </section>
 
-      <!-- How the team works -->
-      <section id="team">
-        <p class="section-label"><i class="ph ph-users-three" aria-hidden="true"></i>How the team works</p>
-        <h2>Our team spaces</h2>
-        <div class="grid">
-          <a class="card t-sage" href="https://uxnourish.netlify.app/" target="_blank" rel="noopener">
-            <div class="icon"><i class="ph ph-push-pin" aria-hidden="true"></i></div>
-            <div><strong>Team noticeboard <i class="ph ph-arrow-up-right" aria-hidden="true"></i></strong><span class="desc">Updates, team dates and site visits.</span></div>
-          </a>
-          <a class="card t-mauve" href="https://ux-edit.netlify.app/" target="_blank" rel="noopener">
-            <div class="icon"><i class="ph ph-newspaper" aria-hidden="true"></i></div>
-            <div><strong>The UX Edit <i class="ph ph-arrow-up-right" aria-hidden="true"></i></strong><span class="desc">The team's own site and quarterly newsletter. Sign in with Microsoft.</span></div>
-          </a>
-          <a class="card t-slate" href="https://nourishcare.atlassian.net/wiki/spaces/Design/pages/531988506/Nourish+UX+Design+Playbook" target="_blank" rel="noopener">
-            <div class="icon"><i class="ph ph-book-open-text" aria-hidden="true"></i></div>
-            <div><strong>UX and Design playbook <i class="ph ph-arrow-up-right" aria-hidden="true"></i></strong><span class="desc">How we work, in the team's Confluence space.</span></div>
-          </a>
-          <a class="card t-clay" href="roles.html">
-            <div class="icon"><i class="ph ph-tree-structure" aria-hidden="true"></i></div>
-            <div><strong>Design roles <i class="ph ph-arrow-right" aria-hidden="true"></i></strong><span class="desc">Who's in the team, their level, product team and line manager.</span></div>
-          </a>
-        </div>
+      <!-- How we work -->
+      <section role="tabpanel" id="team" aria-labelledby="tab-team" tabindex="0" hidden>
+        <h2>How we work</h2>
+        <p class="intro">Where the team shares news, when we meet, and what to expect day to day.</p>
+
+        <h3>Team spaces</h3>
+        <ul class="rows t-sage">
+          <li><a class="row" href="https://uxnourish.netlify.app/" target="_blank" rel="noopener"><span class="row-icon"><i class="ph ph-push-pin" aria-hidden="true"></i></span><span class="row-body"><span class="row-title">Team noticeboard</span><span class="row-desc">Updates, team dates and site visits</span></span><i class="ph ph-arrow-up-right row-go" aria-hidden="true"></i></a></li>
+          <li><a class="row" href="https://ux-edit.netlify.app/" target="_blank" rel="noopener"><span class="row-icon"><i class="ph ph-newspaper" aria-hidden="true"></i></span><span class="row-body"><span class="row-title">The UX Edit</span><span class="row-desc">The team's own site and quarterly newsletter. Sign in with Microsoft.</span></span><i class="ph ph-arrow-up-right row-go" aria-hidden="true"></i></a></li>
+          <li><a class="row" href="https://nourishcare.atlassian.net/wiki/spaces/Design/pages/531988506/Nourish+UX+Design+Playbook" target="_blank" rel="noopener"><span class="row-icon"><i class="ph ph-book-open-text" aria-hidden="true"></i></span><span class="row-body"><span class="row-title">UX and Design playbook</span><span class="row-desc">How we work, in the team's Confluence space</span></span><i class="ph ph-arrow-up-right row-go" aria-hidden="true"></i></a></li>
+          <li><a class="row" href="roles.html"><span class="row-icon"><i class="ph ph-users-three" aria-hidden="true"></i></span><span class="row-body"><span class="row-title">Design roles</span><span class="row-desc">Who's in the team, their level, product team and line manager</span></span><i class="ph ph-arrow-right row-go" aria-hidden="true"></i></a></li>
+        </ul>
 
         <h3>Design ceremonies</h3>
-        <p class="muted">Alongside your product team's meetings, these are the design team's regular touchpoints.</p>
-        <div class="rituals">
-          <div class="ritual"><span class="pill">Weekly · Mon</span><div><strong>UX Standup</strong><span>Share your top priorities for the week. Quick and focused.</span></div></div>
-          <div class="ritual"><span class="pill">Weekly · Thu</span><div><strong>Spotlight</strong><span>Timed design crit. Bring work you're proud of, stuck on or want a second opinion on.</span></div></div>
-          <div class="ritual"><span class="pill">Weekly · Fri</span><div><strong>Design Show and Tell</strong><span>Show the team what you've been working on.</span></div></div>
-          <div class="ritual"><span class="pill">Quarterly</span><div><strong>Team Health Retro</strong><span>An anonymous team vote on how things are going, with time to discuss and improve.</span></div></div>
-        </div>
+        <p class="group-note">Alongside your product team's meetings, these are the design team's regular touchpoints.</p>
+        <ul class="rows stack">
+          <li><div class="row"><span class="day">Monday</span><span class="row-body"><span class="row-title">UX Standup</span><span class="row-desc">Share your top priorities for the week. Quick and focused.</span></span></div></li>
+          <li><div class="row"><span class="day">Thursday</span><span class="row-body"><span class="row-title">Spotlight</span><span class="row-desc">Timed design crit. Bring work you're proud of, stuck on or want a second opinion on.</span></span></div></li>
+          <li><div class="row"><span class="day">Friday</span><span class="row-body"><span class="row-title">Design Show and Tell</span><span class="row-desc">Show the team what you've been working on.</span></span></div></li>
+          <li><div class="row"><span class="day">Quarterly</span><span class="row-body"><span class="row-title">Team Health Retro</span><span class="row-desc">An anonymous vote on how things are going, with time to discuss and improve.</span></span></div></li>
+        </ul>
 
         <h3>Team days</h3>
-        <p>We meet in person as a design team once a month, usually on the <strong>first Thursday</strong>. The location rotates in this order:</p>
-        <ul class="rotation" aria-label="Team day locations in order">
-          <li>London (Paddington)</li><li>Oxford</li><li>Bristol</li><li>Bournemouth</li><li>Birmingham</li>
-        </ul>
-        <p>Dates sometimes move, with at least 6 weeks' notice, so check <a href="https://uxnourish.netlify.app/dates.html" target="_blank" rel="noopener">Team dates</a> on the noticeboard. If you're travelling far or staying overnight, you can claim travel and hotels. Book them through Perk, and ask HR or Finance if you're unsure.</p>
+        <p>We meet in person once a month, usually on the <strong>first Thursday</strong>. The location rotates in this order:</p>
+        <ol class="rotation" aria-label="Team day locations in order">
+          <li><i class="ph ph-map-pin" aria-hidden="true"></i>London (Paddington)</li><li><i class="ph ph-map-pin" aria-hidden="true"></i>Oxford</li><li><i class="ph ph-map-pin" aria-hidden="true"></i>Bristol</li><li><i class="ph ph-map-pin" aria-hidden="true"></i>Bournemouth</li><li><i class="ph ph-map-pin" aria-hidden="true"></i>Birmingham</li>
+        </ol>
+        <p>Dates sometimes move, with at least 6 weeks' notice, so check <a href="https://uxnourish.netlify.app/dates.html" target="_blank" rel="noopener">Team dates<span class="sr-only"> (opens in a new tab)</span></a>. You can claim travel and hotels for long trips. Book them through Perk, and ask HR or Finance if you're unsure.</p>
 
         <h3>121s</h3>
-        <p>You'll have a <strong>fortnightly 121</strong> with your line manager (<span data-manager>Zahra, Hamid or Dean</span>), a casual check-in to talk about how work is going and raise any concerns. Need something between 121s? Message them on Teams.</p>
+        <p>A <strong>fortnightly 121</strong> with your line manager (<span data-manager>Zahra, Hamid or Dean</span>): a casual check-in on how work is going and anything on your mind. Need something in between? Message them on Teams.</p>
 
         <h3>Working hours</h3>
         <p>Core hours are <strong>9am to 5pm, Monday to Friday</strong>. We're flexible as long as you reply in good time, your product team's needs are covered and we can reach you when we need to.</p>
 
         <div class="callout">
           <i class="ph ph-heart" aria-hidden="true"></i>
-          <p>Our team is supportive and passionate. We share work early, ask for help often and are encouraged to experiment. If you're ever unsure, stuck or overwhelmed, reach out. There's always someone happy to help.</p>
+          <p>We share work early, ask for help often and are encouraged to experiment. If you're ever unsure, stuck or overwhelmed, reach out. There's always someone happy to help.</p>
         </div>
+        <div class="next"><a href="#pulse" data-tab-link>Next: Pulse <i class="ph ph-arrow-right" aria-hidden="true"></i></a></div>
       </section>
 
       <!-- Pulse -->
-      <section id="pulse">
-        <p class="section-label"><i class="ph ph-squares-four" aria-hidden="true"></i>Design system</p>
+      <section role="tabpanel" id="pulse" aria-labelledby="tab-pulse" tabindex="0" hidden>
         <h2>Pulse</h2>
-        <p>Pulse is Nourish's design system. Design with the Pulse libraries in Figma, and use the docs for how each component should be used.</p>
-        <div class="grid">
-          <a class="card t-sage" href="https://pulseds.netlify.app/" target="_blank" rel="noopener">
-            <div class="icon"><i class="ph ph-book-bookmark" aria-hidden="true"></i></div>
-            <div><strong>Pulse docs <i class="ph ph-arrow-up-right" aria-hidden="true"></i></strong><span class="desc">Components, foundations and usage guidance. Sign in with GitHub.</span></div>
-          </a>
-          <a class="card t-slate" href="https://nourishcare.atlassian.net/jira/core/projects/PCOV/board" target="_blank" rel="noopener">
-            <div class="icon"><i class="ph ph-kanban" aria-hidden="true"></i></div>
-            <div><strong>PCOV board <i class="ph ph-arrow-up-right" aria-hidden="true"></i></strong><span class="desc">Pulse doesn't have what you need? Raise it here, and talk it through with your line manager.</span></div>
-          </a>
+        <p class="intro">Pulse is Nourish's design system: the components, styles and guidance every product team designs and builds with. It keeps our products consistent and accessible, and means nobody designs the same thing twice.</p>
+
+        <h3>How you'll use it</h3>
+        <ol class="steps three">
+          <li><div><strong>Design with the libraries</strong><span>Add Pulse Components and Pulse Foundations from the Assets panel in Figma, and build your screens from them.</span></div></li>
+          <li><div><strong>Check the guidance</strong><span>The Pulse docs explain when to use each component, with live examples.</span></div></li>
+          <li><div><strong>Raise a gap</strong><span>If Pulse doesn't have what you need, raise it on the PCOV board and talk it through with your line manager.</span></div></li>
+        </ol>
+
+        <h3>Pulse links</h3>
+        <ul class="rows t-mauve">
+          <li><a class="row" href="https://www.figma.com/design/4aH6RUyKkttaRIkqfhMH0P" target="_blank" rel="noopener"><span class="row-icon"><i class="ph ph-figma-logo" aria-hidden="true"></i></span><span class="row-body"><span class="row-title">Pulse Components</span><span class="row-desc">The component library in Figma</span></span><i class="ph ph-arrow-up-right row-go" aria-hidden="true"></i></a></li>
+          <li><a class="row" href="https://www.figma.com/design/QOHkudKlo47Ch9TfEfeMN3" target="_blank" rel="noopener"><span class="row-icon"><i class="ph ph-palette" aria-hidden="true"></i></span><span class="row-body"><span class="row-title">Pulse Foundations</span><span class="row-desc">Colour, type and icons in Figma</span></span><i class="ph ph-arrow-up-right row-go" aria-hidden="true"></i></a></li>
+          <li><a class="row" href="https://pulseds.netlify.app/" target="_blank" rel="noopener"><span class="row-icon"><i class="ph ph-book-bookmark" aria-hidden="true"></i></span><span class="row-body"><span class="row-title">Pulse docs</span><span class="row-desc">Usage guidance and live examples</span></span><i class="ph ph-arrow-up-right row-go" aria-hidden="true"></i></a></li>
+          <li><a class="row" href="https://nourishcare.atlassian.net/jira/core/projects/PCOV/board" target="_blank" rel="noopener"><span class="row-icon"><i class="ph ph-kanban" aria-hidden="true"></i></span><span class="row-body"><span class="row-title">PCOV board</span><span class="row-desc">Where Pulse gaps are raised and tracked</span></span><i class="ph ph-arrow-up-right row-go" aria-hidden="true"></i></a></li>
+        </ul>
+
+        <div class="callout">
+          <i class="ph ph-github-logo" aria-hidden="true"></i>
+          <p>You sign in to the Pulse docs with GitHub. If you haven't yet, <a href="https://github.com/signup" target="_blank" rel="noopener">sign up to GitHub<span class="sr-only"> (opens in a new tab)</span></a> with your Nourish email and ask Adam H or Ben Galvin to add you to the <strong>nourishcare</strong> organisation.</p>
         </div>
+        <div class="next"><a href="#brain" data-tab-link>Next: Product Brain <i class="ph ph-arrow-right" aria-hidden="true"></i></a></div>
       </section>
 
       <!-- Product Brain -->
-      <section id="brain">
-        <p class="section-label"><i class="ph ph-brain" aria-hidden="true"></i>AI-assisted design</p>
+      <section role="tabpanel" id="brain" aria-labelledby="tab-brain" tabindex="0" hidden>
         <h2>Product Brain and Claude</h2>
-        <p>The Product Brain holds Nourish's product context: strategy, personas, research and design work. We use it with Claude for research synthesis, journey maps and prototypes. You don't need it on day one. Pick it up once you're settled in.</p>
-        <div class="callout">
-          <i class="ph ph-github-logo" aria-hidden="true"></i>
-          <p>The Brain is a private GitHub repository, so <strong>get GitHub access first</strong> and sign in. Then open <a href="https://github.com/nourishcare/nourish-product-brain/blob/main/start-here/for-designers.md" target="_blank" rel="noopener">the designers' guide</a>, and ask your line manager to help you connect Claude.</p>
-        </div>
+        <p class="intro">The Product Brain holds Nourish's product context: strategy, bets, personas, research and design work. Used with Claude, it's the quickest way to get up to speed on your product area, and it speeds up discovery and design work.</p>
+
+        <h3>What you can do with it</h3>
+        <ul class="rows t-slate">
+          <li><div class="row"><span class="row-icon"><i class="ph ph-compass" aria-hidden="true"></i></span><span class="row-body"><span class="row-title">Get up to speed</span><span class="row-desc">Ask about your product area, its bets, customers and personas</span></span></div></li>
+          <li><div class="row"><span class="row-icon"><i class="ph ph-chats-circle" aria-hidden="true"></i></span><span class="row-body"><span class="row-title">Make sense of research</span><span class="row-desc">Turn research into empathy maps and How Might We questions</span></span></div></li>
+          <li><div class="row"><span class="row-icon"><i class="ph ph-path" aria-hidden="true"></i></span><span class="row-body"><span class="row-title">Map journeys</span><span class="row-desc">Current and future journeys, and service blueprints</span></span></div></li>
+          <li><div class="row"><span class="row-icon"><i class="ph ph-cursor-click" aria-hidden="true"></i></span><span class="row-body"><span class="row-title">Prototype</span><span class="row-desc">Build clickable prototypes to test and share ideas</span></span></div></li>
+        </ul>
+
+        <h3>Get set up</h3>
+        <ol class="steps three">
+          <li><div><strong>Get GitHub access</strong><span>The Brain is the private repository <strong>nourishcare/nourish-product-brain</strong>. <a href="https://github.com/signup" target="_blank" rel="noopener">Sign up to GitHub<span class="sr-only"> (opens in a new tab)</span></a> with your Nourish email, then ask Adam H or Ben Galvin to add you to the <strong>nourishcare</strong> organisation. Send them your GitHub username. Until you're added, the Brain's links show a GitHub 404 page.</span></div></li>
+          <li><div><strong>Read the designers' guide</strong><span>Once you're signed in to GitHub, start with <a href="https://github.com/nourishcare/nourish-product-brain/blob/main/start-here/for-designers.md" target="_blank" rel="noopener">the guide for designers<span class="sr-only"> (opens in a new tab)</span></a>.</span></div></li>
+          <li><div><strong>Connect Claude</strong><span>Your line manager will help you connect Claude to the Brain, so you can start using it straight away.</span></div></li>
+        </ol>
+        <div class="next"><a href="#tools" data-tab-link>Next: Tools and links <i class="ph ph-arrow-right" aria-hidden="true"></i></a></div>
       </section>
 
       <!-- Tools -->
-      <section id="tools">
-        <p class="section-label"><i class="ph ph-toolbox" aria-hidden="true"></i>Tools and links</p>
-        <h2>Everything you'll use</h2>
+      <section role="tabpanel" id="tools" aria-labelledby="tab-tools" tabindex="0" hidden>
+        <h2>Tools and links</h2>
+        <p class="intro">Everything you'll use, grouped by what it's for.</p>
 
-        <div class="tools-group t-sand">
-          <div class="tools-head"><h3>Employee admin</h3></div>
-          <div class="grid">
-            <a class="card" href="https://nourishcare.bamboohr.com/login.php" target="_blank" rel="noopener"><div class="icon"><i class="ph ph-identification-card" aria-hidden="true"></i></div><div><strong>BambooHR</strong><span class="desc">Time off, personal details and other HR tasks.</span></div></a>
-            <a class="card" href="https://members.yulife.com/login?region=UK" target="_blank" rel="noopener"><div class="icon"><i class="ph ph-gift" aria-hidden="true"></i></div><div><strong>YuLife</strong><span class="desc">Employee rewards and perks.</span></div></a>
-            <a class="card" href="https://portal.clearooms.com/" target="_blank" rel="noopener"><div class="icon"><i class="ph ph-desk" aria-hidden="true"></i></div><div><strong>Clearooms</strong><span class="desc">Book a desk for office days.</span></div></a>
-            <a class="card" href="https://app.perk.com/login" target="_blank" rel="noopener"><div class="icon"><i class="ph ph-airplane-tilt" aria-hidden="true"></i></div><div><strong>Perk</strong><span class="desc">Book travel and hotels for work trips.</span></div></a>
-            <a class="card" href="https://eu.knowbe4.com/" target="_blank" rel="noopener"><div class="icon"><i class="ph ph-shield-check" aria-hidden="true"></i></div><div><strong>KnowBe4</strong><span class="desc">IT and security training.</span></div></a>
-          </div>
-        </div>
+        <h3>Employee admin</h3>
+        <ul class="rows cols t-sand">
+          <li><a class="row" href="https://nourishcare.bamboohr.com/login.php" target="_blank" rel="noopener"><span class="row-icon"><i class="ph ph-identification-card" aria-hidden="true"></i></span><span class="row-body"><span class="row-title">BambooHR</span><span class="row-desc">Time off, personal details and other HR tasks</span></span><i class="ph ph-arrow-up-right row-go" aria-hidden="true"></i></a></li>
+          <li><a class="row" href="https://members.yulife.com/login?region=UK" target="_blank" rel="noopener"><span class="row-icon"><i class="ph ph-gift" aria-hidden="true"></i></span><span class="row-body"><span class="row-title">YuLife</span><span class="row-desc">Employee rewards and perks</span></span><i class="ph ph-arrow-up-right row-go" aria-hidden="true"></i></a></li>
+          <li><a class="row" href="https://portal.clearooms.com/" target="_blank" rel="noopener"><span class="row-icon"><i class="ph ph-desk" aria-hidden="true"></i></span><span class="row-body"><span class="row-title">Clearooms</span><span class="row-desc">Book a desk for office days</span></span><i class="ph ph-arrow-up-right row-go" aria-hidden="true"></i></a></li>
+          <li><a class="row" href="https://app.perk.com/login" target="_blank" rel="noopener"><span class="row-icon"><i class="ph ph-airplane-tilt" aria-hidden="true"></i></span><span class="row-body"><span class="row-title">Perk</span><span class="row-desc">Book travel and hotels for work trips</span></span><i class="ph ph-arrow-up-right row-go" aria-hidden="true"></i></a></li>
+          <li><a class="row" href="https://eu.knowbe4.com/" target="_blank" rel="noopener"><span class="row-icon"><i class="ph ph-shield-check" aria-hidden="true"></i></span><span class="row-body"><span class="row-title">KnowBe4</span><span class="row-desc">IT and security training</span></span><i class="ph ph-arrow-up-right row-go" aria-hidden="true"></i></a></li>
+        </ul>
 
-        <div class="tools-group t-slate">
-          <div class="tools-head"><h3>Product</h3></div>
-          <div class="grid">
-            <a class="card" href="https://nourishcare.atlassian.net/" target="_blank" rel="noopener"><div class="icon"><i class="ph ph-kanban" aria-hidden="true"></i></div><div><strong>Jira and Confluence</strong><span class="desc">Tickets and the wiki. Sign up with your Nourish email and request access.</span></div></a>
-            <a class="card" href="https://www.microsoft365.com/?auth=2&amp;home=1" target="_blank" rel="noopener"><div class="icon"><i class="ph ph-microsoft-outlook-logo" aria-hidden="true"></i></div><div><strong>Microsoft 365</strong><span class="desc">Outlook, Teams and SharePoint, our main document store.</span></div></a>
-            <a class="card" href="https://miro.com/app/dashboard/" target="_blank" rel="noopener"><div class="icon"><i class="ph ph-presentation" aria-hidden="true"></i></div><div><strong>Miro</strong><span class="desc">Whiteboards. Sign up with your Nourish email and request access.</span></div></a>
-            <a class="card" href="https://claude.ai/" target="_blank" rel="noopener"><div class="icon"><i class="ph ph-sparkle" aria-hidden="true"></i></div><div><strong>Claude</strong><span class="desc">AI assistant, used with the Product Brain.</span></div></a>
-          </div>
-        </div>
+        <h3>Product</h3>
+        <ul class="rows cols t-slate">
+          <li><a class="row" href="https://nourishcare.atlassian.net/" target="_blank" rel="noopener"><span class="row-icon"><i class="ph ph-kanban" aria-hidden="true"></i></span><span class="row-body"><span class="row-title">Jira and Confluence</span><span class="row-desc">Sign up with your Nourish email and request access</span></span><i class="ph ph-arrow-up-right row-go" aria-hidden="true"></i></a></li>
+          <li><a class="row" href="https://www.microsoft365.com/?auth=2&amp;home=1" target="_blank" rel="noopener"><span class="row-icon"><i class="ph ph-microsoft-outlook-logo" aria-hidden="true"></i></span><span class="row-body"><span class="row-title">Microsoft 365</span><span class="row-desc">Outlook, Teams and SharePoint</span></span><i class="ph ph-arrow-up-right row-go" aria-hidden="true"></i></a></li>
+          <li><a class="row" href="https://miro.com/app/dashboard/" target="_blank" rel="noopener"><span class="row-icon"><i class="ph ph-presentation" aria-hidden="true"></i></span><span class="row-body"><span class="row-title">Miro</span><span class="row-desc">Whiteboards. Sign up with your Nourish email.</span></span><i class="ph ph-arrow-up-right row-go" aria-hidden="true"></i></a></li>
+          <li><a class="row" href="https://claude.ai/" target="_blank" rel="noopener"><span class="row-icon"><i class="ph ph-sparkle" aria-hidden="true"></i></span><span class="row-body"><span class="row-title">Claude</span><span class="row-desc">AI assistant, used with the Product Brain</span></span><i class="ph ph-arrow-up-right row-go" aria-hidden="true"></i></a></li>
+        </ul>
 
-        <div class="tools-group t-sage">
-          <div class="tools-head"><h3>UX and Design</h3><span class="pill">Design team</span></div>
-          <div class="grid">
-            <a class="card" href="https://www.figma.com/downloads/" target="_blank" rel="noopener"><div class="icon"><i class="ph ph-figma-logo" aria-hidden="true"></i></div><div><strong>Figma</strong><span class="desc">Our main design tool. Your invite is in your inbox.</span></div></a>
-            <a class="card" href="https://pulseds.netlify.app/" target="_blank" rel="noopener"><div class="icon"><i class="ph ph-squares-four" aria-hidden="true"></i></div><div><strong>Pulse docs</strong><span class="desc">The design system: components, foundations and guidance.</span></div></a>
-            <a class="card" href="https://app.heymarvin.com/team/" target="_blank" rel="noopener"><div class="icon"><i class="ph ph-magnifying-glass" aria-hidden="true"></i></div><div><strong>Marvin</strong><span class="desc">Research library for user insights and findings.</span></div></a>
-            <a class="card" href="https://app.uxcel.com/home" target="_blank" rel="noopener"><div class="icon"><i class="ph ph-graduation-cap" aria-hidden="true"></i></div><div><strong>UXcel</strong><span class="desc">Bite-sized design learning. Your invite is in your inbox.</span></div></a>
-            <a class="card" href="https://mobbin.com/discover/apps/ios/latest" target="_blank" rel="noopener"><div class="icon"><i class="ph ph-device-mobile" aria-hidden="true"></i></div><div><strong>Mobbin</strong><span class="desc">UI patterns from 400,000+ app screens. Log in through 1Password. Ask your line manager for access.</span></div></a>
-          </div>
-        </div>
+        <h3>UX and Design</h3>
+        <ul class="rows cols t-sage">
+          <li><a class="row" href="https://www.figma.com/downloads/" target="_blank" rel="noopener"><span class="row-icon"><i class="ph ph-figma-logo" aria-hidden="true"></i></span><span class="row-body"><span class="row-title">Figma</span><span class="row-desc">Our main design tool. Your invite is in your inbox.</span></span><i class="ph ph-arrow-up-right row-go" aria-hidden="true"></i></a></li>
+          <li><a class="row" href="https://pulseds.netlify.app/" target="_blank" rel="noopener"><span class="row-icon"><i class="ph ph-squares-four" aria-hidden="true"></i></span><span class="row-body"><span class="row-title">Pulse docs</span><span class="row-desc">The design system. Sign in with GitHub.</span></span><i class="ph ph-arrow-up-right row-go" aria-hidden="true"></i></a></li>
+          <li><a class="row" href="https://app.heymarvin.com/team/" target="_blank" rel="noopener"><span class="row-icon"><i class="ph ph-magnifying-glass" aria-hidden="true"></i></span><span class="row-body"><span class="row-title">Marvin</span><span class="row-desc">Research library for user insights</span></span><i class="ph ph-arrow-up-right row-go" aria-hidden="true"></i></a></li>
+          <li><a class="row" href="https://app.uxcel.com/home" target="_blank" rel="noopener"><span class="row-icon"><i class="ph ph-graduation-cap" aria-hidden="true"></i></span><span class="row-body"><span class="row-title">UXcel</span><span class="row-desc">Bite-sized design learning</span></span><i class="ph ph-arrow-up-right row-go" aria-hidden="true"></i></a></li>
+          <li><a class="row" href="https://mobbin.com/discover/apps/ios/latest" target="_blank" rel="noopener"><span class="row-icon"><i class="ph ph-device-mobile" aria-hidden="true"></i></span><span class="row-body"><span class="row-title">Mobbin</span><span class="row-desc">UI patterns. Log in through 1Password; ask your line manager.</span></span><i class="ph ph-arrow-up-right row-go" aria-hidden="true"></i></a></li>
+        </ul>
 
-        <div class="tools-group t-mauve">
-          <div class="tools-head"><h3>Nourish demo environments</h3><span class="pill">Ask Rado or your team's tech lead for access</span></div>
-          <div class="grid">
-            <a class="card" href="https://dev-org.nourishcare.co.uk/admin" target="_blank" rel="noopener"><div class="icon"><i class="ph ph-browser" aria-hidden="true"></i></div><div><strong>Better Care Web</strong><span class="desc">dev-org.nourishcare.co.uk/admin</span></div></a>
-            <a class="card" href="https://bits.nourishcare.com/dashboard" target="_blank" rel="noopener"><div class="icon"><i class="ph ph-browser" aria-hidden="true"></i></div><div><strong>Empower Web</strong><span class="desc">bits.nourishcare.com/dashboard</span></div></a>
-          </div>
-        </div>
+        <h3>Nourish demo environments</h3>
+        <p class="group-note">Ask Rado or your team's tech lead for access.</p>
+        <ul class="rows cols t-mauve">
+          <li><a class="row" href="https://dev-org.nourishcare.co.uk/admin" target="_blank" rel="noopener"><span class="row-icon"><i class="ph ph-browser" aria-hidden="true"></i></span><span class="row-body"><span class="row-title">Better Care Web</span><span class="row-desc">dev-org.nourishcare.co.uk/admin</span></span><i class="ph ph-arrow-up-right row-go" aria-hidden="true"></i></a></li>
+          <li><a class="row" href="https://bits.nourishcare.com/dashboard" target="_blank" rel="noopener"><span class="row-icon"><i class="ph ph-browser" aria-hidden="true"></i></span><span class="row-body"><span class="row-title">Empower Web</span><span class="row-desc">bits.nourishcare.com/dashboard</span></span><i class="ph ph-arrow-up-right row-go" aria-hidden="true"></i></a></li>
+        </ul>
 
-        <div class="tools-group t-clay">
-          <div class="tools-head"><h3>Sales demo videos</h3><span class="pill">Watch to understand the product</span></div>
-          <p>See how Nourish is shown to customers. It's useful context for the product and its value.</p>
-          <div class="grid">
-            <a class="card" href="https://app.jiminny.eu/export/RNZSA3U91SlOSj2cyaFAOT4AuaEH2KI1lCRKS3zSPkczEIk6fzdV05Rug" target="_blank" rel="noopener"><div class="icon"><i class="ph ph-play-circle" aria-hidden="true"></i></div><div><strong>Grace Eyre Foundation demo</strong></div></a>
-            <a class="card" href="https://app.jiminny.eu/export/8vOI1UW4uaEHGNIanfyES7nIlGSlipkc45s06hzSAOclpS2peaB5C8" target="_blank" rel="noopener"><div class="icon"><i class="ph ph-play-circle" aria-hidden="true"></i></div><div><strong>Adult services demo</strong></div></a>
-            <a class="card" href="https://app.jiminny.eu/export/ddmiN2IlXiEnIwPtNrS4mUEHLbCyCrCweF1VcBNSNhLdhQ4jmwYuZ" target="_blank" rel="noopener"><div class="icon"><i class="ph ph-play-circle" aria-hidden="true"></i></div><div><strong>Wright Care demo</strong></div></a>
-            <a class="card" href="https://app.jiminny.eu/export/jNMhzDSnZTyNCrTV5fElI4AhkBhqpuoLHLgcdGinKULVS5qHr9n8JXc4" target="_blank" rel="noopener"><div class="icon"><i class="ph ph-play-circle" aria-hidden="true"></i></div><div><strong>Alexander House demo</strong></div></a>
-          </div>
-        </div>
+        <h3>Sales demo videos</h3>
+        <p class="group-note">See how Nourish is shown to customers. It's useful context for the product and its value.</p>
+        <ul class="rows cols t-clay">
+          <li><a class="row" href="https://app.jiminny.eu/export/RNZSA3U91SlOSj2cyaFAOT4AuaEH2KI1lCRKS3zSPkczEIk6fzdV05Rug" target="_blank" rel="noopener"><span class="row-icon"><i class="ph ph-play" aria-hidden="true"></i></span><span class="row-body"><span class="row-title">Grace Eyre Foundation demo</span></span><i class="ph ph-arrow-up-right row-go" aria-hidden="true"></i></a></li>
+          <li><a class="row" href="https://app.jiminny.eu/export/8vOI1UW4uaEHGNIanfyES7nIlGSlipkc45s06hzSAOclpS2peaB5C8" target="_blank" rel="noopener"><span class="row-icon"><i class="ph ph-play" aria-hidden="true"></i></span><span class="row-body"><span class="row-title">Adult services demo</span></span><i class="ph ph-arrow-up-right row-go" aria-hidden="true"></i></a></li>
+          <li><a class="row" href="https://app.jiminny.eu/export/ddmiN2IlXiEnIwPtNrS4mUEHLbCyCrCweF1VcBNSNhLdhQ4jmwYuZ" target="_blank" rel="noopener"><span class="row-icon"><i class="ph ph-play" aria-hidden="true"></i></span><span class="row-body"><span class="row-title">Wright Care demo</span></span><i class="ph ph-arrow-up-right row-go" aria-hidden="true"></i></a></li>
+          <li><a class="row" href="https://app.jiminny.eu/export/jNMhzDSnZTyNCrTV5fElI4AhkBhqpuoLHLgcdGinKULVS5qHr9n8JXc4" target="_blank" rel="noopener"><span class="row-icon"><i class="ph ph-play" aria-hidden="true"></i></span><span class="row-body"><span class="row-title">Alexander House demo</span></span><i class="ph ph-arrow-up-right row-go" aria-hidden="true"></i></a></li>
+        </ul>
       </section>
 
     </div>
@@ -223,5 +221,76 @@
     Nourish UX and Design · For internal use · Updated 24 Nov 2026
   </footer>
 
+  <script>
+    /* Personalise with ?name=James&manager=Zahra&tag=Senior%20Product%20Designer */
+    (function () {
+      var params = new URLSearchParams(window.location.search);
+      var name = params.get('name'), manager = params.get('manager'), tag = params.get('tag');
+      if (name) {
+        document.getElementById('welcome-heading').textContent = 'Welcome to Nourish, ' + name;
+        document.title = 'Welcome, ' + name + ' · Nourish UX and Design';
+      }
+      if (manager) document.querySelectorAll('[data-manager]').forEach(function (el) { el.textContent = manager; });
+      if (tag) document.getElementById('hero-tag').textContent = tag;
+
+      /* Row links that open a new tab say so to screen readers */
+      document.querySelectorAll('a.row[target="_blank"]').forEach(function (a) {
+        var s = document.createElement('span');
+        s.className = 'sr-only';
+        s.textContent = ' (opens in a new tab)';
+        a.querySelector('.row-title').appendChild(s);
+      });
+
+      /* Tabs: one section at a time, synced with the URL hash */
+      var tabs = Array.prototype.slice.call(document.querySelectorAll('[role="tab"]'));
+      var tabbar = document.querySelector('.tabbar');
+
+      function select(id, opts) {
+        opts = opts || {};
+        var tab = document.getElementById('tab-' + id);
+        if (!tab) return;
+        tabs.forEach(function (t) {
+          var on = t === tab;
+          t.setAttribute('aria-selected', on ? 'true' : 'false');
+          t.tabIndex = on ? 0 : -1;
+          document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+        });
+        if (opts.focus) tab.focus();
+        if (opts.push) history.replaceState(null, '', location.pathname + location.search + '#' + id);
+        if (opts.scroll && window.scrollY > tabbar.offsetTop) window.scrollTo({ top: tabbar.offsetTop });
+        tab.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      }
+
+      tabs.forEach(function (t, i) {
+        t.addEventListener('click', function () { select(t.getAttribute('aria-controls'), { push: true, scroll: true }); });
+        t.addEventListener('keydown', function (e) {
+          var j = null;
+          if (e.key === 'ArrowRight') j = (i + 1) % tabs.length;
+          else if (e.key === 'ArrowLeft') j = (i - 1 + tabs.length) % tabs.length;
+          else if (e.key === 'Home') j = 0;
+          else if (e.key === 'End') j = tabs.length - 1;
+          if (j === null) return;
+          e.preventDefault();
+          select(tabs[j].getAttribute('aria-controls'), { focus: true, push: true });
+        });
+      });
+
+      document.querySelectorAll('[data-tab-link]').forEach(function (a) {
+        a.addEventListener('click', function (e) {
+          e.preventDefault();
+          var id = a.getAttribute('href').slice(1);
+          select(id, { push: true, scroll: true });
+          document.getElementById(id).focus({ preventScroll: true });
+        });
+      });
+
+      var start = location.hash.slice(1);
+      if (start && document.getElementById('tab-' + start)) select(start);
+      window.addEventListener('hashchange', function () {
+        var id = location.hash.slice(1);
+        if (document.getElementById('tab-' + id)) select(id, { scroll: true });
+      });
+    })();
+  </script>
 </body>
 </html>
