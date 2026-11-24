@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Design roles · Nourish UX and Design</title>
+  <link rel="icon" type="image/png" href="assets/nourish-mark.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css" />
+  <link rel="stylesheet" href="assets/starter.css" />
+  <style>
+    /* Level colours: muted avatar tints on a monochrome page */
+    .lv-head     { --lv-bg: #e9e7e4;          --lv-fg: #3a3633; }
+    .lv-lead     { --lv-bg: var(--slate-bg); --lv-fg: var(--slate); }
+    .lv-senior   { --lv-bg: var(--sage-bg);  --lv-fg: var(--sage); }
+    .lv-designer { --lv-bg: var(--sand-bg);  --lv-fg: var(--sand); }
+    .lv-unknown  { --lv-bg: var(--tint-2);   --lv-fg: var(--muted); }
+
+    .roles-wrap { max-width: 1040px; }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+    /* Controls */
+    .controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; margin-top: 22px; }
+    .legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 0; padding: 0; list-style: none; }
+    .legend li { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: var(--muted); }
+    .legend .swatch { width: 12px; height: 12px; border-radius: 999px; background: var(--lv-bg); box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.06); }
+
+    /* Person card: one treatment for everyone */
+    .person {
+      position: relative; z-index: 1;
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      background: var(--canvas); border-radius: var(--radius-lg);
+      box-shadow: 0 0 0 1px var(--line), 0 1px 2px rgb(0 0 0 / 0.03);
+      padding: 14px 8px 12px; text-align: center;
+    }
+    .avatar {
+      width: 40px; height: 40px; border-radius: 999px; margin-bottom: 6px;
+      background: var(--lv-bg); color: var(--lv-fg);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; letter-spacing: 0.02em;
+    }
+    .person .name { font-size: 14px; font-weight: 700; color: var(--ink); line-height: 1.3; }
+    .person .title { margin: 4px 0 2px; }
+    .title-tag {
+      display: inline-block; font-size: 11px; font-weight: 600; line-height: 1.45; white-space: nowrap;
+      padding: 2px 8px; border-radius: 999px;
+      background: var(--lv-bg); color: var(--lv-fg);
+    }
+    .person.is-leave { background: var(--tint); box-shadow: 0 0 0 1px var(--line-soft); }
+    .person.is-leave .avatar { background: var(--tint-2); color: var(--faint); opacity: 0.8; }
+    .person.is-leave .name, .person.is-leave .team, .person.is-leave .meta { color: var(--faint); }
+    .person.is-leave .title-tag { background: var(--tint-2); color: var(--faint); }
+    .person.is-leave .chip.leave { background: var(--canvas); box-shadow: inset 0 0 0 1px var(--line); }
+    .person .team { font-size: 12.5px; color: var(--text); line-height: 1.4; margin-top: 2px; }
+    .person .meta { font-size: 12px; color: var(--faint); margin-top: 4px; }
+    .person .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; margin-top: 6px; }
+    .chip { display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 600; line-height: 1.5; padding: 1px 8px; border-radius: 999px; white-space: nowrap; }
+    .chip.start { background: var(--clay-bg); color: var(--clay); }
+    .chip.leave { background: var(--tint-2); color: var(--muted); }
+
+    /* Level view */
+    .bands { margin-top: 36px; display: grid; gap: 28px; }
+    .band { display: grid; grid-template-columns: 170px 1fr; gap: 16px; align-items: start; padding-top: 22px; border-top: 1px solid var(--line-soft); }
+    .band:first-child { border-top: 0; padding-top: 0; }
+    .band h2 { font-size: 15px; margin: 6px 0 0; display: flex; align-items: center; gap: 8px; }
+    .band h2 .swatch { width: 12px; height: 12px; border-radius: 999px; background: var(--lv-bg); box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.06); }
+    .band .count { font-size: 12.5px; color: var(--faint); }
+    .band-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+
+    .note { margin-top: 40px; font-size: 13px; color: var(--muted); }
+    [hidden] { display: none !important; }
+
+    @media (max-width: 640px) {
+      .band { grid-template-columns: 1fr; gap: 10px; }
+      .controls { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site">
+    <div class="wrap roles-wrap">
+      <a class="brand" href="starterpack.html" aria-label="Back to the starter pack">
+        <img src="assets/nourish-logo.png" alt="Nourish" class="brand-logo" />
+        <img src="assets/nourish-mark.png" alt="Nourish" class="brand-mark" />
+        <span class="brand-divider" aria-hidden="true"></span>
+        <span class="brand-text"><strong>UX and Design</strong><span>Design roles</span></span>
+      </a>
+      <a class="header-link" href="starterpack.html" aria-label="Starter pack">
+        <i class="ph ph-arrow-left" aria-hidden="true"></i><span>Starter pack</span>
+      </a>
+    </div>
+  </header>
+
+  <section class="hero" style="padding-top:0">
+    <div class="wrap roles-wrap">
+      <p class="eyebrow">UX and Design team</p>
+      <h1>Design roles</h1>
+      <p class="lede">Who's in the UX and Design team, grouped by level, with the product team each person works with and who they report to.</p>
+      <div class="controls">
+        <ul class="legend" aria-label="Levels">
+          <li class="lv-lead"><span class="swatch" aria-hidden="true"></span>Principal and Lead</li>
+          <li class="lv-senior"><span class="swatch" aria-hidden="true"></span>Senior</li>
+          <li class="lv-designer"><span class="swatch" aria-hidden="true"></span>Product Designer</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <main>
+    <div class="wrap roles-wrap">
+      <div id="bands" class="bands"></div>
+      <p class="note">Updated 24 Nov 2026. Something out of date? Tell Zahra.</p>
+    </div>
+  </main>
+
+  <footer class="site">
+    <img src="assets/nourish-mark.png" alt="" />
+    Nourish UX and Design · For internal use
+  </footer>
+
+  <script>
+    /* Edit the team here. level: head | lead | senior | designer | unknown.
+       manager: the id of their line manager. */
+    var PEOPLE = [
+      { id: 'zs', name: 'Zahra Siddiquia',    title: 'Head of Design',              level: 'head' },
+      { id: 'hh', name: 'Hamid Hafeez',       title: 'Lead Product Designer I',      level: 'lead',     team: 'Better Care',                manager: 'zs' },
+      { id: 'db', name: 'Dean Bates',         title: 'Lead Product Designer II',     level: 'lead',     team: 'Best Practice',              manager: 'zs' },
+      { id: 'di', name: 'Damion Isaac',       title: 'Principal Product Designer',   level: 'lead',     team: 'Maternity',                  manager: 'zs' },
+      { id: 'cb', name: 'Caitlin Ballingall', title: 'UX Research Lead',             level: 'lead',     team: 'Research, across teams',     manager: 'zs' },
+
+      { id: 'ap', name: 'Alice Perichon',     title: 'Senior Product Designer',      level: 'senior',   team: 'Good Outcomes',              manager: 'hh' },
+      { id: 'ih', name: 'Iselin Huo',         title: 'Senior Product Designer',      level: 'senior',   team: 'Beacon',                     manager: 'hh', starts: '8 Dec' },
+      { id: 'zk', name: 'Zain Khan',          title: 'Product Designer',             level: 'designer', team: 'Safety',                     manager: 'hh' },
+      { id: 'jb', name: 'Jackson Blankson',   title: 'Product Designer',             level: 'designer', team: 'Confidence and Wellbeing',   manager: 'hh' },
+      { id: 'lws', name: 'Laura Wiegand-Smith',title: 'Product Designer',             level: 'designer', team: 'Empower',                    manager: 'hh', starts: '8 Dec' },
+      { id: 'tt', name: 'Tamera Thistleton',  title: 'Product Designer',             level: 'designer',                                      manager: 'hh', leave: 'Maternity leave' },
+
+      { id: 'ax', name: 'Aldous',             title: 'Senior Product Designer',      level: 'senior',   team: 'Better Care at Home',        manager: 'db' },
+      { id: 'ma', name: 'Mariam Alvi',        title: 'Senior Product Designer',      level: 'senior',   team: 'Confidence',                 manager: 'db' },
+      { id: 'am', name: 'Andres Menegazzo',    title: 'Senior Product Designer',      level: 'senior',   team: 'Precision 1',                manager: 'db', starts: '8 Dec' },
+      { id: 'js', name: 'James Shead',        title: 'Senior Product Designer',      level: 'senior',   team: 'Resilience (Rostering)',     manager: 'db' }
+    ];
+
+    var LEVELS = [
+      { key: 'head',     label: 'Head of Design' },
+      { key: 'lead',     label: 'Principal and Lead' },
+      { key: 'senior',   label: 'Senior' },
+      { key: 'designer', label: 'Product Designer' }
+    ];
+
+    var byId = {};
+    PEOPLE.forEach(function (p) { byId[p.id] = p; });
+    function reportsOf(id) { return PEOPLE.filter(function (p) { return p.manager === id; }); }
+    function firstName(p) { return p.name.split(' ')[0]; }
+    function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+    function initials(p) {
+      var parts = p.name.split(' ');
+      return (parts.length > 1 ? parts[0][0] + parts[parts.length - 1][0] : p.name.slice(0, 2)).toUpperCase();
+    }
+
+    function levelLabel(p) {
+      var l = LEVELS.filter(function (x) { return x.key === p.level; })[0];
+      return l ? l.label : '';
+    }
+
+    function card(p, opts) {
+      opts = opts || {};
+      var chips = [];
+      if (p.starts) chips.push('<span class="chip start"><i class="ph ph-calendar-blank" aria-hidden="true"></i>Starts ' + esc(p.starts) + '</span>');
+      if (p.leave) chips.push('<span class="chip leave"><i class="ph ph-moon" aria-hidden="true"></i>' + esc(p.leave) + '</span>');
+      var meta = [];
+      if (opts.showManager && p.manager) meta.push('Reports to ' + esc(byId[p.manager].name));
+      return '<div class="person lv-' + p.level + (p.leave ? ' is-leave' : '') + '">' +
+        '<div class="avatar" aria-hidden="true">' + esc(initials(p)) + '</div>' +
+        '<div class="name">' + esc(p.name) + '</div>' +
+        '<div class="title"><span class="title-tag">' + esc(p.title) + '</span></div>' +
+        (p.team ? '<div class="team">' + esc(p.team) + '</div>' : '') +
+        (p.level !== 'unknown' && p.level !== 'head' ? '<span class="sr-only">Level: ' + levelLabel(p) + '</span>' : '') +
+        (meta.length ? '<div class="meta">' + meta.join(' · ') + '</div>' : '') +
+        (chips.length ? '<div class="chips">' + chips.join('') + '</div>' : '') +
+        '</div>';
+    }
+
+    function renderBands() {
+      document.getElementById('bands').innerHTML = LEVELS.map(function (l) {
+        var people = PEOPLE.filter(function (p) { return p.level === l.key; });
+        if (!people.length) return '';
+        return '<section class="band lv-' + l.key + '">' +
+          '<div><h2>' + (l.key !== 'unknown' && l.key !== 'head' ? '<span class="swatch" aria-hidden="true"></span>' : '') + l.label + '</h2><span class="count">' + people.length + (people.length === 1 ? ' person' : ' people') + '</span></div>' +
+          '<div class="band-grid">' + people.map(function (p) { return card(p, { showManager: true }); }).join('') + '</div></section>';
+      }).join('');
+    }
+
+    renderBands();
+  </script>
+</body>
+</html>
